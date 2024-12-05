@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1077401381119",
+    "firebase_url": "https://homeworkoutapplication-a9904-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "homeworkoutapplication-a9904",
+    "storage_bucket": "homeworkoutapplication-a9904.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077401381119:android:761c25ea3fb84fb630c4ca",
+        "android_client_info": {
+          "package_name": "com.app.homeworkoutapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoUlzuzcVyQ8DpSNCWEqpaCsoq7YoIXh4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1077401381119:android:2c969683ea70846c30c4ca",
+        "android_client_info": {
+          "package_name": "com.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoUlzuzcVyQ8DpSNCWEqpaCsoq7YoIXh4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
