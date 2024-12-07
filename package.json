@@ -39,6 +39,7 @@
     "glob": "^11.0.0",
     "google-auth-library": "^9.15.0",
     "jsonwebtoken": "^9.0.2",
+    "longvnhue.gymex": "file:",
     "lottie-react-native": "^7.1.0",
     "native-notify": "^4.0.7",
     "react": "18.3.1",

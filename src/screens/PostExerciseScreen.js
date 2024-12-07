@@ -9,8 +9,10 @@ import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import LottieView from 'lottie-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { useColor } from "../context/ColorContext";
 
 const PostExerciseScreen = ({navigation}) => {
+    const {selectedColor} = useColor()
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true); 
@@ -113,7 +115,7 @@ const PostExerciseScreen = ({navigation}) => {
 
 
     return( 
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             <Header1 title="Workout" navigation={navigation} isLogin={isLogin} username={username} name='PostExercise'/>
             
             <ScrollView contentContainerStyle={styles.bodyContent}>

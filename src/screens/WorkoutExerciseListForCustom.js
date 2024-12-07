@@ -9,9 +9,11 @@ import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import LottieView from 'lottie-react-native';
 import ExerciseContentNotDetail from "../components/ExerciseContentNotDetail";
+import { useColor } from "../context/ColorContext";
 
 const { width } = Dimensions.get('window');
 const WorkoutExerciseListForCustom = ({ navigation, route }) => {
+    const {selectedColor} = useColor()
     const [isModalVisible, setModalVisible] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
@@ -342,7 +344,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             {/* Header */}
             <Header1 title="Workout" navigation={navigation} isLogin={isLogin} username={username} name='WorkoutExerciseList'/>
 

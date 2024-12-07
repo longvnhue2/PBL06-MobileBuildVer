@@ -10,9 +10,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import { Header } from "react-navigation-stack";
+import { useColor } from "../context/ColorContext";
 
 const ProgressScreen = ({navigation}) => {
-
+    const {selectedColor} = useColor()
     const [currentWeight, setCurrentWeight] = useState('N/A');
     const [currentForearms, setCurrentForearms] = useState('N/A');
     const [currentHeight, setCurrentHeight] = useState('N/A');
@@ -109,7 +110,7 @@ const ProgressScreen = ({navigation}) => {
     // console.log(goalShoulders);
     // console.log(goalWaist);
     // console.log(goalWeight);
-    return <View style={styles.container}>
+    return <View style={[styles.container, {backgroundColor: selectedColor}]}>
         <Header1
                 title="Profile" 
                 navigation={navigation} 

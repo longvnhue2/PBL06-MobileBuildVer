@@ -8,9 +8,11 @@ import Footer1 from "../components/Footer1";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
+import { useColor } from "../context/ColorContext";
 
 
 const DateIndicatorPlanScreen = ({navigation}) => {
+    const {selectedColor} = useColor();
     const [description, setDescription] = useState(''); 
     const [planName, setPlanName] = useState('');
     const [selectedNumber, setSelectedNumber] = useState(1); 
@@ -124,7 +126,7 @@ const DateIndicatorPlanScreen = ({navigation}) => {
         }
     }
 
-    return <View style={styles.container}>
+    return <View style={[styles.container, {backgroundColor: selectedColor}]}>
         <Header1 
                 title="Workout" 
                 navigation={navigation} 

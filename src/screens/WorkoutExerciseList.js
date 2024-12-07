@@ -8,9 +8,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import LottieView from 'lottie-react-native';
+import SearchBar from "../components/SearchBar";
+import { useColor } from "../context/ColorContext";
 
-const { width } = Dimensions.get('window');
 const WorkoutExerciseList = ({ navigation, route }) => {
+    const {selectedColor} = useColor()
     const [isModalVisible, setModalVisible] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
@@ -261,6 +263,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             break;
                         }
                 }
+                setFilterData(exerciseData)
             }
             catch (error) {
                 console.error('Error fetching exercise data:', error);
@@ -345,8 +348,13 @@ const WorkoutExerciseList = ({ navigation, route }) => {
             }
     }
 
+    const handleChangeInputSearch = (value) => {
+        setExerciseData(filterData)
+        setExerciseData(filterData.filter((exercise) => exercise.text.toLowerCase().includes(value.toLowerCase())))
+    }
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             {/* Header */}
             <Header1 title="Workout" navigation={navigation} isLogin={isLogin} username={username} name='WorkoutExerciseList'/>
 
@@ -379,6 +387,13 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                     <TouchableOpacity style={styles.buttonTitle} onPress={handleAddExercise}>
                         <Text style={styles.buttonText}>+ Add Exercise</Text>
                     </TouchableOpacity>
+                </View>
+
+                <View style={styles.searchContainer}>
+                    <SearchBar
+                        placeholder="Name ..."
+                        onChange={handleChangeInputSearch}
+                    />
                 </View>
 
                 <View style={styles.filtersContainer}>
@@ -556,6 +571,11 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '400',
         color: '#fff',
+    },
+    searchContainer: {
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        paddingHorizontal: '4%'
     },
     filtersContainer: {
         flexDirection: 'row',

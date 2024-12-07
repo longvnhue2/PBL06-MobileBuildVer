@@ -8,10 +8,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import SnowFallEffect from "../effects/SnowFlake";
+import { useColor } from "../context/ColorContext";
 
 const {fromWidth, fromHeight} = Dimensions.get('window');
 const HomieScr = ({ navigation }) => {
-    
+    const {selectedColor} = useColor();
     const fadeAnim = useRef(new Animated.Value(0)).current; 
     const slideAnim = useRef(new Animated.Value(-100)).current; 
     const [isLogin, setIsLogin] = useState(false);
@@ -122,7 +123,7 @@ const HomieScr = ({ navigation }) => {
         <View style={styles.container}>
             <Header1 title="HomeZ" navigation={navigation} isLogin={isLogin} username={username} />
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={styles.body}>
+                <View style={[styles.body, {backgroundColor: selectedColor}]}>
                     <Image
                         style={styles.titleIMG}
                         source={require('../../assets/accel.jpg')}

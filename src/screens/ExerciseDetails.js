@@ -8,9 +8,11 @@ import { WebView } from 'react-native-webview';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
+import { useColor } from "../context/ColorContext";
 
 
 const ExerciseDetails = ({navigation, route}) => {
+    const {selectedColor} = useColor()
     const [backPage, setBackpage] = useState('');
     const time = route.params?.restTime;
     const propertyDetail = route.params?.propertyDetail || '0 sets, 0 reps';
@@ -164,7 +166,7 @@ const ExerciseDetails = ({navigation, route}) => {
     const totalTimeRest = time;
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             <Header1 title="Workout" 
                     navigation={navigation} 
                     isLogin={isLogin} 

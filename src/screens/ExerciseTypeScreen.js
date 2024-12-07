@@ -12,7 +12,9 @@ import Header1 from "../components/Header1";
 import Footer1 from "../components/Footer1";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useColor } from "../context/ColorContext";
 const ExerciseTypeScreen = ({ navigation }) => {
+  const {selectedColor} = useColor();
   const [isLogin, setIsLogin] = useState(false);
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true); 
@@ -39,7 +41,7 @@ const ExerciseTypeScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: selectedColor}]}>
       <Header1 
                 title="Workout" 
                 navigation={navigation} 

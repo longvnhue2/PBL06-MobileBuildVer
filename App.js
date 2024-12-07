@@ -1,24 +1,6 @@
-// import { createAppContainer } from "react-navigation";
-// import { createStackNavigator } from "react-navigation-stack";
-// import HomeScreen from "./src/screens/HomeScreen";
-
-// const navigator = createStackNavigator(
-//   {
-//     Home: HomeScreen,
-//   },
-//   {
-//     initialRouteName: "Home",
-//     defaultNavigationOptions: {
-//       title: "App",
-//     },
-//   }
-// );
-
-// export default createAppContainer(navigator);
-
 import registerNNPushToken from "native-notify";
-import { NavigationContainer } from "@react-navigation/native"; // Thay thế createAppContainer
-import { createStackNavigator } from "@react-navigation/stack"; // Thay thế createStackNavigator
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import React, { useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -45,6 +27,7 @@ import PostExerciseScreen from "./src/screens/PostExerciseScreen";
 import FirebaseMessaging from "./src/screens/FCMTokenTesting";
 import TokenScreen from "./src/screens/TokenTesting";
 import WorkoutExerciseListForCustom from "./src/screens/WorkoutExerciseListForCustom";
+import { ColorProvider } from "./src/context/ColorContext";
 
 // Constants and helper function for token expiration check
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -72,41 +55,39 @@ const checkAndDeleteTokenIfExpired = async () => {
 const Stack = createStackNavigator();
 
 export default function App() {
-  // useEffect(() => {
-  //   registerNNPushToken(25168, 'H1LtryGkC8bF1EsGqmLAfK');
-  //   checkAndDeleteTokenIfExpired();
-  // }, []);
   registerNNPushToken(25168, 'H1LtryGkC8bF1EsGqmLAfK');
   useEffect(() => {
     checkAndDeleteTokenIfExpired();
   }, []);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="testingNavi" component={testingNavi} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-        <Stack.Screen name="Workout1" component={WorkoutExercise1} />
-        <Stack.Screen name="WorkoutExerciseList" component={WorkoutExerciseList} />
-        <Stack.Screen name="HomieScr" component={HomieScr} />
-        <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />
-        <Stack.Screen name="CustomPlan" component={CustomPlanScreen} />
-        <Stack.Screen name="Plan" component={PlanScreen} />
-        <Stack.Screen name="MyPlan" component={MyPlanScreen} />
-        <Stack.Screen name="Progress" component={ProgressScreen} />
-        <Stack.Screen name="ProgressCalendar" component={ProgressCalendar} />
-        <Stack.Screen name="ExerciseType" component={ExerciseTypeScreen} />
-        <Stack.Screen name="DateIndicatorPlan" component={DateIndicatorPlanScreen} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="Profile" component={Profile} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="PostExercise" component={PostExerciseScreen} />
-        <Stack.Screen name="Token" component={TokenScreen} />
-        <Stack.Screen name="FCMTokenTesting" component={FirebaseMessaging} />
-        <Stack.Screen name="WorkoutExerciseCustom" component={WorkoutExerciseListForCustom} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <ColorProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="testingNavi" component={testingNavi} />
+          <Stack.Screen name="LoginScreen" component={LoginScreen} />
+          <Stack.Screen name="Workout1" component={WorkoutExercise1} />
+          <Stack.Screen name="WorkoutExerciseList" component={WorkoutExerciseList} />
+          <Stack.Screen name="HomieScr" component={HomieScr} />
+          <Stack.Screen name="ExerciseDetails" component={ExerciseDetails} />
+          <Stack.Screen name="CustomPlan" component={CustomPlanScreen} />
+          <Stack.Screen name="Plan" component={PlanScreen} />
+          <Stack.Screen name="MyPlan" component={MyPlanScreen} />
+          <Stack.Screen name="Progress" component={ProgressScreen} />
+          <Stack.Screen name="ProgressCalendar" component={ProgressCalendar} />
+          <Stack.Screen name="ExerciseType" component={ExerciseTypeScreen} />
+          <Stack.Screen name="DateIndicatorPlan" component={DateIndicatorPlanScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="PostExercise" component={PostExerciseScreen} />
+          <Stack.Screen name="Token" component={TokenScreen} />
+          <Stack.Screen name="FCMTokenTesting" component={FirebaseMessaging} />
+          <Stack.Screen name="WorkoutExerciseCustom" component={WorkoutExerciseListForCustom} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </ColorProvider>
   );
 }

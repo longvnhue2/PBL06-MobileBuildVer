@@ -6,8 +6,10 @@ import Footer1 from "../components/Footer1";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColor } from "../context/ColorContext";
 
 const WorkoutExercise1 = ({ navigation }) => {
+    const {selectedColor} = useColor()
     const [loading, setLoading] = useState(true); 
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
@@ -57,7 +59,7 @@ const WorkoutExercise1 = ({ navigation }) => {
             <Header1 title="Workout" navigation={navigation} isLogin={isLogin} username={username} name='Workout1'/>
             
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={styles.body}>
+                <View style={[styles.body, { backgroundColor: selectedColor }]}>
                     <View style={styles.title2}>
                         <Text style={styles.text}>Push up:</Text>
                         <TouchableOpacity onPress={toggleStar}>

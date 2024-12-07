@@ -9,11 +9,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useFocusEffect } from '@react-navigation/native';
 import BASE_URL from "../../IPHelper";
-
-
-
+import SearchBar from "../components/SearchBar";
+import { useColor } from "../context/ColorContext";
 
 const MyPlanScreen = ({navigation}) => {
+    const {selectedColor} = useColor()
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true); 
@@ -21,6 +21,7 @@ const MyPlanScreen = ({navigation}) => {
     const [PlanData2, setPlanData2] = useState([]);
     const [exercisePlanData, setExercisePlanData] = useState([]);
     const [PlanData, setPlanData] = useState([]);
+    const [filterPlan, setFilterPlan] = useState([])
 
 
     useFocusEffect(
@@ -76,6 +77,7 @@ const MyPlanScreen = ({navigation}) => {
               }));
 
               setPlanData(GetPLAN);
+              setFilterPlan(GetPLAN)
 
               const planInstanceResponse = await axios.get(`${BASE_URL}/api/plan-instances/all`, {
                 headers: {
@@ -128,12 +130,18 @@ const MyPlanScreen = ({navigation}) => {
         checkAuth();
       }, [navigation]) 
     );
+
+    const handleChangeInputSearch = (text) => {
+      setPlanData(filterPlan)
+      setPlanData(filterPlan.filter((plan) => plan.title.toLowerCase().includes(text.toLowerCase())))
+    };
+
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             <Header1 
                 title="Workout" 
                 navigation={navigation} 
@@ -166,12 +174,18 @@ const MyPlanScreen = ({navigation}) => {
                 </View>
 
                 <View style={styles.titleContainer2}>
-                    <Text style={styles.titleText}>Recommend</Text>
-                    <TouchableOpacity 
-                        style={styles.buttonTitle}
-                    >
-                        <Text style={styles.titleText}>Beginner</Text>
-                    </TouchableOpacity>
+                  <Text style={styles.titleText}>Recommend</Text>
+                  {/* <TouchableOpacity 
+                      style={styles.buttonTitle}
+                  >
+                      <Text style={styles.titleText}>Beginner</Text>
+                  </TouchableOpacity> */}
+
+                  <SearchBar
+                    placeholder="Plan name ..."
+                    onChange={handleChangeInputSearch}
+                  />
+                  
                 </View>
                 
                 <View style={{marginBottom: 20, marginTop: 20}}>
@@ -216,8 +230,9 @@ const styles = StyleSheet.create({
     },
     titleContainer2:{
         flexDirection: 'row',
-        marginTop: 10,
+        justifyContent: 'space-between',
         alignItems: 'center',
+        paddingHorizontal: '4%',
     },
     titleContainer1: {
         flexDirection: 'row',
@@ -229,6 +244,7 @@ const styles = StyleSheet.create({
         height: 50,
         borderWidth: 2, 
         borderColor: 'white', 
+        borderRadius: 6,
         backgroundColor: 'rgb(34,50,52)',
         alignItems: 'center',
         justifyContent: 'center'
@@ -246,152 +262,3 @@ const styles = StyleSheet.create({
 });
 
 export default MyPlanScreen;
-
-
-
-// const quickFetchRating = async () => {
-    //     try{
-    //         const responsePLAN = await axios.get(`${BASE_URL}/api/plans/all`, {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
-    //         const responseExercise_Plans = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //             },
-    //         });
-    //         const GetPLAN = responsePLAN.data.map((data) => ({
-    //             id: data.id,
-    //             title: data.name,
-    //             status: data.status,
-    //             total_day : data.totalDays,
-    //             rating : data.rating,  
-    //             iconName: 'rocket'
-    //         }));
-    //         const getExercisePlan = responseExercise_Plans.data.map((data) => ({
-    //             id: data.id,
-    //             planID: data.plan.id,
-    //             exerciseID: data.exercise.id
-    //         }));
-    //         setPlanData(GetPLAN);
-
-    //         //HANDLE number of exercise each plan
-    //         setExercisePlanData(getExercisePlan);
-    //         const updatedPlanData = calculateExerciseCount(GetPLAN, getExercisePlan);
-    //         setPlanData(updatedPlanData);
-
-    //     }
-    //     catch(err){
-    //         console.log(err);
-    //     }
-    // }
-    // const PlanData = [
-    //     {
-    //         title:'Leg Plan',
-    //         subtitle1:'5 exercise',
-    //         subtitle2:'(Start in 3 day!)',
-    //         iconName:'rocket',
-    //     },
-    //     {
-    //         title:'Shoulder',
-    //         subtitle1:'',
-    //         subtitle2:'(Start in 1 day!)',
-    //         iconName:'twitter',
-    //     },
-    //     {
-    //         title:'Chest Plan',
-    //         subtitle1:'3 exercise',
-    //         subtitle2:'',
-    //         iconName:'stack-overflow',
-    //     },
-        
-
-    // ];
-
-    // useEffect(() => {
-    //     const unsubscribe = navigation.addListener('focus', () => {
-    //       refresh();
-    //     });
-    //     return unsubscribe;
-    //   }, [navigation]);
-
-
-    // useEffect(() => {
-    //     const checkAuth = async () => {
-    //         const token = await AsyncStorage.getItem('accessToken');
-            
-    //         if (token) {
-    //             setIsLogin(true);
-    //             setUsername(await AsyncStorage.getItem('username') || '');
-    //             try{
-    //                 const responsePLAN = await axios.get(`${BASE_URL}/api/plans/all`, {
-    //                     headers: {
-    //                         Authorization: `Bearer ${token}`,
-    //                     },
-    //                 });
-    //                 console.log(responsePLAN.data.length);
-    //                 const responseExercise_Plans = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
-    //                     headers: {
-    //                         Authorization: `Bearer ${token}`,
-    //                     },
-    //                 });
-
-    //                 const responseDate_Plan = await axios.get(`${BASE_URL}/api/date-plans/all`, 
-    //                     {
-    //                         headers: {
-    //                             Authorization: `Bearer ${token}`,
-    //                         },
-    //                     },
-    //                 );
-
-    //                 const plansWithExerciseCount = responseDate_Plan.data.reduce((acc, datePlan) => {
-    //                     const matchingExercises = responseExercise_Plans.data.filter(exercisePlan => exercisePlan.datePlanId === datePlan.id);
-             
-    //                     if (!acc[datePlan.planId]) {
-    //                         acc[datePlan.planId] = 0;
-    //                     }
-     
-    //                     acc[datePlan.planId] += matchingExercises.length;
-                        
-    //                     return acc;
-    //                 }, {});
-                    
-
-    //                 console.log(plansWithExerciseCount);
-                    
-    //                 const GetPLAN = responsePLAN.data.map((data) => ({
-    //                     id: data.id,
-    //                     title: data.name,
-    //                     status: data.status,
-    //                     total_day : data.totalDays,
-    //                     rating: data.rating,  
-    //                     subtitle1: `${plansWithExerciseCount[data.id] || 0} exercies`,
-    //                     iconName: 'rocket'
-    //                 }));
-
-                    
-
-    //                 // const getExercisePlan = responseExercise_Plans.data.map((data) => ({
-    //                 //     id: data.id,
-    //                 //     planID: data.plan.id,
-    //                 //     exerciseID: data.exercise.id
-    //                 // }));
-    //                 setPlanData(GetPLAN);
-
-    //                 //HANDLE number of exercise each plan
-    //                 // setExercisePlanData(getExercisePlan);
-    //                 // const updatedPlanData = calculateExerciseCount(GetPLAN, getExercisePlan);
-
-    //             }
-    //             catch(err){
-    //                 console.log(err);
-    //             }
-    //         }
-    //         else{
-    //             navigation.navigate('LoginScreen');
-    //         }
-    //         setLoading(false);
-    //     };
-    //     checkAuth();
-    // }, [navigation]);

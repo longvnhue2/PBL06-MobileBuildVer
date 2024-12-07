@@ -12,13 +12,14 @@ import ExerciseContentNotDetailAction from "../components/ExerciseContentNotDeta
 import ExerciseContentNotDetail from "../components/ExerciseContentNotDetail";
 import ExerciseContentNotDetailNewAction from "../components/ExerciseContentNotDetailNewAction";
 import LottieView from 'lottie-react-native';
+import { useColor } from "../context/ColorContext";
 
 const generateRange = (start, end) => {
     return Array.from({ length: end - start + 1 }, (_, i) => (start + i).toString().padStart(2, '0'));
 };
 
 const CustomPlanScreen = ({ navigation, route }, props) => {
-
+    const {selectedColor} = useColor()
     // const exerciseData = [
     //     {
     //         imgsrc: require('../../assets/dorothy.png'),
@@ -393,7 +394,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
 
             <Header1 
                 title="Workout" 

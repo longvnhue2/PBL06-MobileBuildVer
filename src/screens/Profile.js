@@ -9,8 +9,10 @@ import * as ImagePicker from "expo-image-picker"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
+import { useColor } from "../context/ColorContext";
 
 const Profile = ({ navigation }) => {
+    const { selectedColor } = useColor()
     const [Token, setToken] = useState('')
     const [refresh, setRefresh] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
@@ -34,6 +36,14 @@ const Profile = ({ navigation }) => {
             name: ''
         }
     })
+    const userDataConfig = [
+        { label: 'Username', field: 'username'},
+        { label: 'Email', field: 'email'},
+        { label: 'First name', field: 'firstName'},
+        { label: 'Last name', field: 'lastName' },
+        { label: 'Birthday', field: 'birthday'},
+        { label: 'Age', field: 'age'}
+    ]
 
     const uploadAvatar = async (formData) => {
         try {
@@ -107,7 +117,7 @@ const Profile = ({ navigation }) => {
                     }
                 }));
 
-                let userAttribute = await axios.get(`${BASE_URL}/api/user-attributes?userId.equals=${userData.data.id}&page=0&size=20`, {
+                let userAttribute = await axios.get(`${BASE_URL}/api/user-attributes?userId.equals=${userData.data.id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -129,51 +139,27 @@ const Profile = ({ navigation }) => {
         checkAuth();
     }, [refresh]);
 
-    const handleUpdateUserData = async (field, value) => {
-        const updateData = { ...userData, [field]: value }
-        
+    const handleUpdateData = async () => {
         try {
-            await axios.put(`${BASE_URL}/api/account`, updateData, {
+            await axios.put(`${BASE_URL}/api/account`, userData, {
                 headers: {
                     Authorization: `Bearer ${Token}`
                 }
             })
-            setUserData(updateData)
-            setRefresh(!refresh)
+
+            const updateUserAttributesPromises = userAttributes.map(attribute => {
+                return axios.put(`${BASE_URL}/api/user-attributes/${attribute.id}`, attribute, {
+                    headers: {
+                        Authorization: `Bearer ${Token}`
+                    }
+                });
+            });
+            await Promise.all(updateUserAttributesPromises);
+
             Alert.alert('Success', 'Update successfully!');
         }
-        catch (err) {
-            console.error("Error updating user data:", err);
-            Alert.alert('Error', 'Update fail. Please try later!');
-        }
-    }
-
-    const handleUpdateUSerAttributes = async (name, field, value, isFocus, focus) => {
-        const updateUserAttribute = userAttributes.map(attr => {
-            if (attr.name === name){
-                return {
-                    ...attr,
-                    [isFocus]: focus,
-                    [field]: value,
-                }
-            }
-            return attr
-        })
-
-        const updatedAttribute = updateUserAttribute.find(attr => attr.name === name);
-        
-        try {
-            await axios.put(`${BASE_URL}/api/user-attributes/${updatedAttribute.id}`, updatedAttribute, {
-                headers: {
-                    Authorization: `Bearer ${Token}`
-                }
-            })
-            setUserAttributes(updateUserAttribute)
-            setRefresh(!refresh)
-            Alert.alert('Success', 'Update successfully!');
-        }
-        catch (err) {
-            console.error("Error updating user attribute:", err);
+        catch (error) {
+            console.error("There was an error updating user data or attribute:", error)
             Alert.alert('Error', 'Update fail. Please try later!');
         }
     }
@@ -207,7 +193,7 @@ const Profile = ({ navigation }) => {
     }
 
     return ( 
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             <Header1 
                 title="Profile" 
                 navigation={navigation} 
@@ -231,61 +217,31 @@ const Profile = ({ navigation }) => {
             </View>
 
             <ScrollView style={styles.mainContent}>
-                <UserAttribute 
-                    label='Username' 
-                    input='TextInput' 
-                    value={userData.username}
-                    unit=''
-                    isFocus={false}
-                    button={true}
-                    onUpdate={(value) => handleUpdateUserData('username', value)}
-                />
-                <UserAttribute 
-                    label='Email' 
-                    input='TextInput' 
-                    value={userData.email}
-                    unit=''
-                    isFocus={false}
-                    button={true}
-                    onUpdate={(value) => handleUpdateUserData('email', value)}
-                />
-                <UserAttribute 
-                    label='First name' 
-                    input='TextInput' 
-                    value={userData.firstName}
-                    unit=''
-                    isFocus={false}
-                    button={true}
-                    onUpdate={(value) => handleUpdateUserData('firstName', value)}
-                />
-                <UserAttribute 
-                    label='Last name' 
-                    input='TextInput' 
-                    value={userData.lastName}
-                    unit=''
-                    isFocus={false}
-                    button={true}
-                    onUpdate={(value) => handleUpdateUserData('lastName', value)}
-                />
+                <View style={styles.userProfile}>
+                    <TouchableOpacity style={styles.user} onPress={handleUserAvatar}>
+                        <Image 
+                            style={styles.userAva} 
+                            source={userData.publicAvatarUrl ? { uri: userData.publicAvatarUrl } : require("../../assets/default avatar.jpg")}
+                        />
+                        <View style={styles.cameraImage}>
+                            <Icon name="camera-retro" size={15}/>
+                        </View>
+                    </TouchableOpacity>
 
-                <UserAttribute 
-                    label='Birthday' 
-                    input='DateTimePicker' 
-                    value={userData.birthday}
-                    unit=''
-                    isFocus={false}
-                    button={true}
-                    onUpdate={(value) => handleUpdateUserData('birthday', value)}
-                />
+                    <Text style={styles.username}>{userData.username}</Text>
+                </View>
 
-                <UserAttribute 
-                    label='Age' 
-                    input='TextInput' 
-                    value={calculateAge(userData.birthday).toString()}
-                    unit=''
-                    isFocus={false}
-                    button={false}
-                />
+                {userDataConfig.map(({label, field}) => (
+                    <UserAttribute
+                        key={field}
+                        label={label}
+                        field={field}
+                        input={label === 'Birthday' ? 'DateTimePicker' : 'TextInput'}
+                        value={label === 'Age' ? calculateAge(userData['birthday']).toString() : userData[field]}
+                        data={userData}
+                        setData={setUserData}
+                    />
+                ))}
 
                 {userAttributes.map(attribute => (
                     <View key={attribute.id} style={styles.userAttributeContainer}>
@@ -295,18 +251,19 @@ const Profile = ({ navigation }) => {
                             value={attribute.measure.toString()}
                             unit={attribute.unit}
                             isFocus={attribute.isFocus}
-                            button={true}
-                            onUpdate={(value, focus) => handleUpdateUSerAttributes(attribute.name, 'measure', value, 'isFocus', focus)}
+                            data={userAttributes}
+                            setData={setUserAttributes}
                         />
 
                         <UserAttribute
                             label='Goal'
+                            field={attribute.attribute.name}
                             input='TextInput' 
                             value={attribute.measureGoal.toString()}
                             unit={attribute.unit}
                             isFocus={attribute.isFocus}
-                            button={true}
-                            onUpdate={(value, focus) => handleUpdateUSerAttributes(attribute.name, 'measureGoal', value, 'isFocus', focus)}
+                            data={userAttributes}
+                            setData={setUserAttributes}
                         />
                     </View>
                     
@@ -317,32 +274,18 @@ const Profile = ({ navigation }) => {
                     input='TextInput' 
                     value={
                         calculateBMI(
-                            userAttributes.find(attr => attr.name === 'Height')?.measure,
-                            userAttributes.find(attr => attr.name === 'Weight')?.measure
+                            userAttributes.find(attr => attr.attribute.name === 'height')?.measure,
+                            userAttributes.find(attr => attr.attribute.name === 'weight')?.measure
                         ).toString()
                     }
-                    unit=''
-                    isFocus={false}
-                    button={false}
                 />
-            </ScrollView>
 
-            <View style={styles.userProfile}>
-                <TouchableOpacity style={styles.user} onPress={handleUserAvatar}>
-                    <Image 
-                        style={styles.userAva} 
-                        source={userData.publicAvatarUrl ? { uri: userData.publicAvatarUrl } : require("../../assets/default avatar.jpg")}
-                    />
-                    <View style={styles.cameraImage}>
-                        <Icon name="camera-retro" size={15}/>
-                    </View>
-                    <View style={styles.userInfo}>
-                        <Text style={styles.username}>{userData.username}</Text>
-                        <Text style={styles.userStatus}>{`${userData.firstName} ${userData.lastName}`}</Text>
-                    </View>
-                </TouchableOpacity>
-                <Text style={styles.dot}>...</Text>
-            </View>
+                <View style={styles.btnSaveContainer}>
+                    <TouchableOpacity style={styles.button} onPress={handleUpdateData}>
+                        <Text style={styles.buttonText}>Save</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
 
             <View style={styles.footer}>
                 <Footer1 navigation={navigation} />
@@ -354,7 +297,6 @@ const Profile = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'rgb(25,20,50)',
     },
     legendContainer: {
         flexDirection: 'row',
@@ -384,63 +326,68 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     mainContent: {
-        marginBottom: 180,
+        height: '100%'
     },
     userAttributeContainer: {
         flexDirection: 'row',
     },
     userProfile: {
-        position: 'absolute',
-        bottom: 73,
-        left: 0,
-        right: 0,
-        height: 100,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        backgroundColor: 'rgb(24, 26, 39)',
-    },
-    user: {
-        flexDirection: 'row'
+        paddingVertical: 20,
     },
     userAva: {
-        width: 90,
-        height: 90,
+        width: 120,
+        height: 120,
         fontSize: 30,
         color: '#fff',
         borderWidth: 1,
         borderColor: 'red',
-        borderRadius: 45,
+        borderRadius: 60,
         justifyContent: 'center',
         alignItems: 'center',
     },
     cameraImage: {
-        width: 30,
-        height: 30,
+        width: 40,
+        height: 40,
         position: 'absolute',
         bottom: 0,
-        left: 60,
-        borderRadius: 15,
+        left: 80,
+        borderRadius: 20,
         backgroundColor: '#d8dadf',
         alignItems: 'center',
         justifyContent: 'center',
     },
-    userInfo: {
-        justifyContent: 'center',
-        marginLeft: 13,
-    },
     username: {
         fontSize: 20,
-        color: '#fff'
+        fontWeight: 'bold',
+        color: '#fff',
+        marginTop: 10,
     },
     userStatus: {
         fontSize: 20,
         color: '#53565f'
     },
-    dot: {
-        fontSize: 30,
-        color: '#fff',
+
+    btnSaveContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 100
+    },
+    button: {
+        borderWidth: 3,
+        borderColor: '#3ab9ff',
+        width: '30%',
+        borderRadius: 8,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    buttonText: {
+        color: '#3ab9ff',
+        fontSize: 25,
         fontWeight: 'bold'
     },
     footer: {

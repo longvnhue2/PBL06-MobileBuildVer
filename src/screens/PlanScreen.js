@@ -9,13 +9,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import CommentCard from "../components/CommentCard";
+import { useColor } from "../context/ColorContext";
 
 
 const PlanScreen = ({ navigation, route }) => {
+    const {selectedColor} = useColor()
     const [visibleItems, setVisibleItems] = useState(3); 
     const [isFeedbackVisible, setIsFeedbackVisible] = useState(false);
     const animation = useRef(new Animated.Value(0)).current; 
-
 
     const toggleFeedbackZone = () => {
         setIsFeedbackVisible(!isFeedbackVisible);
@@ -624,7 +625,7 @@ const PlanScreen = ({ navigation, route }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             {/* Header */}
             <Header1 
                 title="Workout" 

@@ -6,8 +6,10 @@ import Header1 from "../components/Header1";
 import Footer1 from "../components/Footer1";
 import ProgressTabs from '../components/ProgressTabs';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColor } from '../context/ColorContext';
 
 const ProgressCalendar = ({ navigation }) => {
+    const {selectedColor} = useColor()
     const [selectedDate, setSelectedDate] = useState('');
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
@@ -40,7 +42,7 @@ const ProgressCalendar = ({ navigation }) => {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, {backgroundColor: selectedColor}]}>
             {/* Header */}
             <Header1 
                 title="Profile" 

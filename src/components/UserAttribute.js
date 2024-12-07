@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { TouchableOpacity, Text, View, TextInput, StyleSheet, Switch } from "react-native";
+import { Text, View, TextInput, StyleSheet, Switch } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Icon from "react-native-vector-icons/FontAwesome5";
+import { measure } from "react-native-reanimated";
 
 const UserAttribute = (props) => {
-    const { label, input, value, unit, isFocus, button, onUpdate } = props;
-    const [isUpdate, setUpdate] = useState(false);
-    const [buttonText, setButtonText] = useState('Update');
-    const [valueInput, setValueInput] = useState(value);
+    const { label, field, input, value, unit, isFocus, data, setData } = props;
+
     const [showPicker, setShowPicker] = useState(false);
     const [date, setDate] = useState(new Date(value));
     const [toggleFocus, setToggleFocus] = useState(isFocus);
@@ -17,44 +17,45 @@ const UserAttribute = (props) => {
         const year = date.getFullYear();
         return `${day < 10 ? '0' + day : day}/${month < 10 ? '0' + month : month}/${year}`;
     };
-    
-    const handleUpdate = () => {
-        if (input === 'DateTimePicker') {
-            setShowPicker(true);
-            return;
-        }
 
-        if (isUpdate) {
-            onUpdate(valueInput, toggleFocus);
-        }
-        setUpdate(!isUpdate);
-        setButtonText(isUpdate ? 'Update' : 'OK');
-    };
+    const handleToggleFocus = () => {
+        setToggleFocus(!toggleFocus)
+        setData(data.map(item => 
+            item.attribute.name === field
+                ? {
+                    ...item,
+                    isFocus: !toggleFocus
+                }
+                : item
+        ));
+    }
 
     const onDateChange = (event, selectedDate) => {
-        const currentDate = selectedDate || date;
         setShowPicker(false);
-        setDate(currentDate);
-        const formattedDate = currentDate.toISOString();
-        setValueInput(formattedDate);
-        onUpdate(formattedDate);
+        setDate(selectedDate);
+        setData({
+            ...data,
+            [field]: selectedDate.toISOString()
+        })
     };
 
     const handleInputChange = (text) => {
-        if (unit !== '') {
-            // Only allow numbers
-            const numericValue = text.replace(/[^0-9]/g, ''); 
-            setValueInput(numericValue);
-        } else {
-            setValueInput(text);
+        if (unit) {
+            setData(data.map(item => 
+                item.attribute.name === (label === 'Goal' ? field : label)
+                    ? {
+                        ...item,
+                        [label === 'Goal' ? 'measureGoal' : 'measure']: text,
+                    }
+                    : item
+            ));
+            return;
         }
-    };
 
-    const toggleSwitch = () => {
-        setToggleFocus(!toggleFocus);
-        if (!toggleFocus) {
-            //onUpdate(valueInput);  // Update the database with the current value when switching to focus mode
-        }
+        setData({
+            ...data,
+            [field]: text,
+        });
     };
 
     return (
@@ -66,7 +67,7 @@ const UserAttribute = (props) => {
                 {unit && (label === 'Goal' && (
                     <Switch
                         style={styles.switch}
-                        onValueChange={toggleSwitch}
+                        onValueChange={handleToggleFocus}
                         value={toggleFocus}
                     />
                     )) 
@@ -82,27 +83,30 @@ const UserAttribute = (props) => {
                 {input === 'TextInput' ? (
                     <TextInput
                         style={[styles.input, unit && styles.inputAttribute]}
-                        value={valueInput}
-                        editable={isUpdate}
+                        value={value}
+                        editable={label === 'Username' || label === 'Age' || label === 'BMI' ? false : true}
                         onChangeText={handleInputChange}
                         numberOfLines={1}
                         ellipsizeMode="tail"
                         placeholderTextColor="#aaa"
                     />
-                ) : input === 'DateTimePicker' ? (
+                ) : input === 'DateTimePicker' && (
                     <TextInput
                         style={styles.input}
                         value={formatDate(date)}
                         editable={false}
                         placeholderTextColor="#aaa"
                     />
-                ) : null}
+                )}
                 
-                {button ? (
-                    <TouchableOpacity style={[styles.button, unit && styles.buttonAttribute]} onPress={handleUpdate}>
-                        <Text style={styles.buttonText}>{buttonText}</Text>
-                    </TouchableOpacity>
-                ) : null}
+                {input === 'DateTimePicker' && 
+                    <Icon 
+                        name="calendar-day" 
+                        size={25} 
+                        color='white'
+                        onPress={() => setShowPicker(true)}
+                    />
+                }
             </View>
 
             {showPicker && (
@@ -135,6 +139,7 @@ const styles = StyleSheet.create({
     label: {
         color: 'white',
         fontSize: 20,
+        fontWeight: 'bold',
         marginVertical: 'auto',
     },
     labelAttribute: {
@@ -146,25 +151,25 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
         width: '70%',
         backgroundColor: 'black',
         borderRadius: 8,
         paddingVertical: 5,
-        paddingRight: 5,
-        paddingLeft: 15,
+        paddingHorizontal: 15,
     },
     inputContainerAttribute: {
         width: '100%',
         padding: 0
     },
     input: {
-        width: '60%',
+        width: '89%',
         color: 'white',
         fontSize: 18,
         height: 60,
     },
     inputAttribute: {
-        width: '45%',
+        width: '100%',
     },
     focus: {
         borderWidth: 2,
@@ -173,23 +178,6 @@ const styles = StyleSheet.create({
     notFocus: {
         borderWidth: 2,
         borderColor: 'red'
-    },
-    button: {
-        borderWidth: 2,
-        borderColor: '#3ab9ff',
-        // width: 108,
-        width: '32%',
-        borderRadius: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 12,
-    },
-    buttonAttribute: {
-        width: '50%'
-    },
-    buttonText: {
-        color: '#3ab9ff',
-        fontSize: 18,
     },
     switchContainer: {
         width: 100,
