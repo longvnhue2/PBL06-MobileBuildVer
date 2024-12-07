@@ -59,6 +59,7 @@ const PlanScreen = ({ navigation, route }) => {
     const [userId, setUserId] = useState(0);
     const [accessToken, setAccessToken] = useState('');
     const [isPublic, setIsPublic] = useState(false);
+    const [isCMTable, setIsCMTable] = useState(true);
     const borderColorAnimation = useRef(new Animated.Value(0)).current;
     const [newPlanInstance, setNewPlanInstance] = useState({
         name: '',
@@ -547,10 +548,30 @@ const PlanScreen = ({ navigation, route }) => {
         checkAuth();
     }, [navigation]);
 
+
+    useEffect(() => {
+        const refCMTable = async () => {
+            try {
+                const token = await AsyncStorage.getItem('accessToken');
+                setAccessToken(token);
+                const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const userId = accountResponse.data.id;
+                const exists = cmtData.some((item) => item.userId === userId);
+                setIsCMTable(!exists);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        refCMTable();
+    }, [cmtData]); 
+
     if (loading) {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
-
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -586,7 +607,7 @@ const PlanScreen = ({ navigation, route }) => {
                 }
             })
             console.log("Plan copied successfully");
-            ToastAndroid.show('Plan copied successfully', ToastAndroid.TOP);
+            ToastAndroid.show('Get plan successfully, please check your assigned plan!', ToastAndroid.TOP);
         }
         catch (err) {
             console.error("Error coping plan:", err);
@@ -659,49 +680,26 @@ const PlanScreen = ({ navigation, route }) => {
             <ScrollView contentContainerStyle={styles.bodyContent}>
                     
                 <View style={styles.titleContainer}>
-                    <Text style={styles.titleText}>Plan: Arm</Text>
+                    <Text style={styles.titleText}>Plan: {route.params?.namePlan}</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={styles.titleText}>200 </Text>
                         <Icon name='star' color='white' size={35}  />
                     </View>
                 </View>
-
-                {/* <View style={{ marginHorizontal: '4%', marginTop: '2%', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={styles.titleText}>Length: {numDay} days</Text>
+                <View style={{ alignItems: 'center', marginBottom: '-5%', flexDirection: 'row', justifyContent:'space-between', marginHorizontal: 20}}>
+                    <View>
+                        <Text style={styles.textDay}>Length: {route.params?.numExercises}</Text>
+                        <Text style={styles.textDay}>AVG Rating: {route.params?.avgrating || 0}★</Text>
+                        {/* <Text style={styles.textDay}>ABC</Text> */}
+                    </View>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={handleCopyPlan}
+                        onPress={() => handleCopyPlan()}
                     >
-                        <Text style={styles.buttonText}>Copy this plan</Text>
+                        <Text style={styles.buttonText}>Get this plan</Text>
                     </TouchableOpacity>
-                </View> */}
-
-                {/* <View style={{ marginBottom: '5%', flex: 1 }}>
-                    {exerciseData.map((exercise, index) => (
-                        <View key={index}>
-                            <View style={{ marginLeft: '4%', marginTop: '5%' }}>
-                                <Text style={styles.textDay}>Day {index + 1}: </Text>
-                            </View>
-                            <ExerciseContent
-                                navigation={navigation}
-                                imgsrc={exercise.imgsrc}
-                                text={exercise.text}
-                                propertyDetail={exercise.propertyDetail}
-                                exerciseID={exercise.idex}
-                                videopath={exercise.videopath}
-                                description={exercise.description}
-                                isFavorited={exercise.isFavorited}
-                                onFavoriteChange={handleFavoriteChange}
-                                time={exercise.time}
-                                dateOrder={exercise.dateOrder}
-                                restTime={exercise.restTime}
-                                setAndRep={exercise.setAndRep}
-                                back='Plan'
-                            />
-                        </View>
-                    ))}
-                </View> */}
-                <View style={{ marginBottom: '5%', flex: 1 }}>
+                </View>
+                <View style={{ marginBottom: '10%', flex: 1 }}>
                 {Object.keys(groupedExercises)
                     .sort((a, b) => a - b) 
                     .map((dateOrder, index) => (
@@ -731,15 +729,6 @@ const PlanScreen = ({ navigation, route }) => {
                         </View>
                     ))}
             </View>
-
-                <View style={{ alignItems: 'center', marginTop: '10%', marginBottom: '5%' }}>
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => setModalVisible(true)}
-                    >
-                        <Text style={styles.buttonText}>Get this plan</Text>
-                    </TouchableOpacity>
-                </View>
             </ScrollView>
 
             {isPublic ? (
@@ -765,14 +754,16 @@ const PlanScreen = ({ navigation, route }) => {
                         </TouchableOpacity>
                         <View style={styles.feedbackHeader}>
                             <Text style={styles.headerText}>Feedback Zone</Text>
-                            <TouchableOpacity
-                                style={styles.CMTbutton}
-                                onPress={toggleCMTmodal}
-                            >
-                                <Text style={[styles.modalText, { fontSize: 15 }]}>
-                                    Post a comment (^▽^)
-                                </Text>
-                            </TouchableOpacity>
+                            {isCMTable && (
+                                <TouchableOpacity
+                                    style={styles.CMTbutton}
+                                    onPress={toggleCMTmodal}
+                                >
+                                    <Text style={[styles.modalText, { fontSize: 15 }]}>
+                                        Post a comment (^▽^)
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
                         </View>
     
                         <FlatList
@@ -788,7 +779,13 @@ const PlanScreen = ({ navigation, route }) => {
                                     avatarURL={item.avatarURL}
                                     isEditable={item.isEditable}
                                     fetchCMT={fetchCMT}
-                                   
+                                    setStatusMessage={setStatusMessage}
+                                    setRating={setRating}
+                                    setIDCMT={setIDCMT}
+                                    setComment={setComment}
+                                    setCMTmodalVisible={setCMTmodalVisible}
+                                    setTypeFeedback={setTypeFeedback}
+                                    setModalNotiVisible={setModalNotiVisible}
                                 />
                             )}
                             ListEmptyComponent={() => (
@@ -1002,7 +999,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(34,139,34,0.5)',
         borderRadius: 5,
         padding: 10,
-        marginBottom: 40
         // flex: 1,
         // marginHorizontal: '10%',
     },

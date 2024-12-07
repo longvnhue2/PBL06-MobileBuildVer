@@ -23,6 +23,8 @@ const HomeScreen = (props) => {
     <Button title="Welcome" onPress={() => props.navigation.navigate('Welcome')}/>
     <Button title="Token" onPress={() => props.navigation.navigate('Token')}/>
     <Button title="FCMTokenTesting" onPress={() => props.navigation.navigate('FCMTokenTesting')}/>
+    <Button title="RecustomizePlan" onPress={() => props.navigation.navigate('RecustomizePlan')}/>
+    <Button title="CustomPlanEditing" onPress={() => props.navigation.navigate('CustomPlanEditing')}/>
     
   
 

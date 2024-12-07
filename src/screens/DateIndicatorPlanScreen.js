@@ -9,8 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
 
-
-const DateIndicatorPlanScreen = ({navigation}) => {
+const DateIndicatorPlanScreen = ({navigation, route}) => {
     const [description, setDescription] = useState(''); 
     const [planName, setPlanName] = useState('');
     const [selectedNumber, setSelectedNumber] = useState(1); 
@@ -18,24 +17,10 @@ const DateIndicatorPlanScreen = ({navigation}) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
     const [isLogin, setIsLogin] = useState(false);
+    const [existID, setExistID] = useState(0);
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true); 
-
-    const days = Array.from({ length: 15 }, (_, i) => i + 1);
-
-    const renderItem = ({ item }) => (
-        <TouchableOpacity style={styles.dayBox} onPress={() => setSelectedNumber(item)}>
-          <Text style={styles.dayText}>{item}</Text>
-        </TouchableOpacity>
-      );
-
-    const formatDate = (date) => {
-        const day = date.getDate();
-        const month = date.getMonth() + 1; 
-        const year = date.getFullYear();
-        return `${day < 10 ? '0' + day : day}/${month < 10 ? '0' + month : month}/${year}`;
-    };
-
+    const method = route.params?.method || 'post';
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -44,6 +29,12 @@ const DateIndicatorPlanScreen = ({navigation}) => {
             if (token) {
                 setIsLogin(true);
                 setUsername(await AsyncStorage.getItem('username') || '');
+                if (method === 'edit'){
+                    setSelectedNumber(route.params?.totalDays);
+                    setDescription(route.params?.description);
+                    setPlanName(route.params?.planName);
+                    setExistID(route.params?.planID);
+                }
             }
             else{
                 navigation.navigate('LoginScreen');
@@ -76,6 +67,7 @@ const DateIndicatorPlanScreen = ({navigation}) => {
     };
 
     const closeSlider = () => {
+        console.log(selectedNumber);
         setModalVisible(false);
     };
 
@@ -90,34 +82,56 @@ const DateIndicatorPlanScreen = ({navigation}) => {
 
             const userId = accountResponse.data.id;
 
-            const formPOST = {
-                name: planName,
-                description : description,
-                status: "PRIVATE",
-                totalDays: selectedNumber,
-                rating: 0,
-                userId: userId
-            };
-            const POSTresponsePLAN = await axios.post(`${BASE_URL}/api/plans`, formPOST, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            console.log(POSTresponsePLAN.status);
-            const PlanListResponse = await axios.get(`${BASE_URL}/api/plans/all`,{
-                headers:{
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            if (method === 'edit'){
+                const formEDIT = {
+                    name: planName,
+                    description : description,
+                    status: "PRIVATE",
+                    totalDays: selectedNumber,
+                    rating: 0,
+                    userId: userId
+                };
+                const PUTresponsePLAN = await axios.put(`${BASE_URL}/api/plans/${existID}`, formEDIT, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                console.log(PUTresponsePLAN.status);
+                navigation.navigate('RecustomizePlan', {
+                    planID: existID,
+                    totalDays : selectedNumber
+                });
+            }
+            else{
+                const formPOST = {
+                    name: planName,
+                    description : description,
+                    status: "PRIVATE",
+                    totalDays: selectedNumber,
+                    rating: 0,
+                    userId: userId
+                };
+                const POSTresponsePLAN = await axios.post(`${BASE_URL}/api/plans`, formPOST, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                console.log(POSTresponsePLAN.status);
+                const PlanListResponse = await axios.get(`${BASE_URL}/api/plans/all`,{
+                    headers:{
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-            const maxId = Math.max(...PlanListResponse.data.map(plan => plan.id));
+                const maxId = Math.max(...PlanListResponse.data.map(plan => plan.id));
 
-            if (POSTresponsePLAN.status >= 200 && POSTresponsePLAN.status <=300)
-            navigation.navigate('CustomPlan', {
-                planId: maxId,
-                totalDays: selectedNumber,
-                day: 1,
-            });
+                if (POSTresponsePLAN.status >= 200 && POSTresponsePLAN.status <=300)
+                navigation.navigate('CustomPlan', {
+                    planId: maxId,
+                    totalDays: selectedNumber,
+                    day: 1,
+                });
+            }
         }
         catch(e){
             console.log(e);
@@ -150,13 +164,16 @@ const DateIndicatorPlanScreen = ({navigation}) => {
             />
         </View>
 
-        <View style={{alignContent:'center', alignItems:'center', marginTop:100}}>
-            <Text style={styles.text}>Input days of your plan:</Text>
-            <TouchableOpacity style={styles.numberBox} onPress={openSlider}>
-                <Text style={styles.text}>{selectedNumber}</Text>
-            </TouchableOpacity>
-
-
+        <View style={{alignContent:'center', alignItems:'center', marginTop:100}}> 
+            {(method != 'edit') && (
+                <View>
+                <Text style={styles.text}>Input days of your plan:</Text>
+                <TouchableOpacity style={styles.numberBox} onPress={openSlider}>
+                    <Text style={styles.text}>{selectedNumber}</Text>
+                </TouchableOpacity>
+                </View>
+            )}
+            
             <View style={{ marginTop: 30, marginHorizontal: 10 }}>
                 <Text style={styles.text}>Enter the description (optional):</Text>
                 <TextInput
@@ -193,12 +210,16 @@ const DateIndicatorPlanScreen = ({navigation}) => {
                         <Text style={{color:'#fff', fontSize:20}}>Select a Number</Text>
                         <Slider
                             style={styles.slider}
-                            minimumValue={0}
-                            maximumValue={100}
+                            minimumValue={1}
+                            maximumValue={20}
                             step={1}
                             value={selectedNumber}
                             onValueChange={(value) => setSelectedNumber(value)}
                         />
+                        {/* <RNPickerSelect
+                            onValueChange={(value) => setSelectedNumber(value)}
+                            items={items}
+                            /> */}
                         <Text style={styles.selectedValue}>{selectedNumber}</Text>
 
                         <TouchableOpacity style={styles.doneButton} onPress={closeSlider}>
@@ -247,6 +268,11 @@ const styles = StyleSheet.create({
         height: 55,
         marginTop:10
     },
+
+    picker: {
+        width: 200,
+        height: 100,
+      },
 
     buttonNext: {
         borderColor:'#fff', borderWidth:2,

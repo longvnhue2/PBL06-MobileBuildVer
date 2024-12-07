@@ -45,6 +45,8 @@ import PostExerciseScreen from "./src/screens/PostExerciseScreen";
 import FirebaseMessaging from "./src/screens/FCMTokenTesting";
 import TokenScreen from "./src/screens/TokenTesting";
 import WorkoutExerciseListForCustom from "./src/screens/WorkoutExerciseListForCustom";
+import RecustomizePlanScreen from "./src/screens/RecustomizePlanScreen";
+import CustomPlanEditingScreen from "./src/screens/CustomPlanEditingScreen";
 
 // Constants and helper function for token expiration check
 const ACCESS_TOKEN_KEY = "accessToken";
@@ -106,6 +108,8 @@ export default function App() {
         <Stack.Screen name="Token" component={TokenScreen} />
         <Stack.Screen name="FCMTokenTesting" component={FirebaseMessaging} />
         <Stack.Screen name="WorkoutExerciseCustom" component={WorkoutExerciseListForCustom} />
+        <Stack.Screen name="RecustomizePlan" component={RecustomizePlanScreen} />
+        <Stack.Screen name="CustomPlanEditing" component={CustomPlanEditingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
