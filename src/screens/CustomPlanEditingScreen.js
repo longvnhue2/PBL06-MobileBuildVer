@@ -12,14 +12,13 @@ import ExerciseContentNotDetailAction from "../components/ExerciseContentNotDeta
 import ExerciseContentNotDetail from "../components/ExerciseContentNotDetail";
 import ExerciseContentNotDetailNewAction from "../components/ExerciseContentNotDetailNewAction";
 import LottieView from 'lottie-react-native';
-import { useColor } from "../context/ColorContext";
 
 const generateRange = (start, end) => {
     return Array.from({ length: end - start + 1 }, (_, i) => (start + i).toString().padStart(2, '0'));
 };
 
-const CustomPlanScreen = ({ navigation, route }, props) => {
-    const {selectedColor} = useColor()
+const CustomPlanEditingScreen = ({ navigation, route }, props) => {
+
     // const exerciseData = [
     //     {
     //         imgsrc: require('../../assets/dorothy.png'),
@@ -44,13 +43,14 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true); 
     const [exerciseData, setExerciseData] = useState([]);   
-    const [schedule, setSchedule] = useState('20:00');
+    const [schedule, setSchedule] = useState(route.params?.schedule);
     const [selectedHour, setSelectedHour] = useState('00');
     const [selectedMinute, setSelectedMinute] = useState('00');
     const [modalVisible, setModalVisible] = useState(false);
     const hours = generateRange(0, 23);
     const minutes = generateRange(0, 59);
     const [exerciseIds, setExerciseIds] = useState([]);
+    const [oldDatePlanIds, setOldDatePlanIds] = useState([]);
     const currentPlan = route.params?.planId;
     const [showModal, setShowModal] = useState(false); 
     const [selectedExerciseID, setSelectedExerciseID] = useState(null);
@@ -60,7 +60,8 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
     const [modalSuccessVisible, setModalSuccessVisible] = useState(false);
     const [modalEmptyVisible, setModalEmptyVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
-
+    const planID = route.params?.planID || 0;
+    const dayOrder = route.params?.dayOrder || 0;
 
     const openModal = (exerciseID) => {
         setSelectedExerciseID(exerciseID);
@@ -91,220 +92,119 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
     };
     
     const HandleNav = async () => {
-        const totalDays = route.params?.totalDays;
-        let t = dateOrder + 1;
-        const storedExerciseIds = await AsyncStorage.getItem('exerciseIds');
-        const existingExerciseIds = storedExerciseIds ? storedExerciseIds.split(',').map(Number) : [];  
-        const updatedExerciseIds = [...existingExerciseIds, ...exerciseIds];
-        if (exerciseIds.length === 0) {
-            setModalEmptyVisible(true);  
-            setModalMessage('You haven\'t added any exercise on this day yet!'); 
-          }
-        else{
-            if (dateOrder < totalDays) {
-                try{
-                    await AsyncStorage.setItem('exerciseIds', updatedExerciseIds.join(',')); 
-                    const token = await AsyncStorage.getItem('accessToken');
-                    const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
+        try{
+            const token = await AsyncStorage.getItem('accessToken');
+            const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-                    const userId = accountResponse.data.id;
-                    const PlanListResponse = await axios.get(`${BASE_URL}/api/plans/all`,{
-                        headers:{
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
+            const userId = accountResponse.data.id;
 
-                    const maxId = Math.max(...PlanListResponse.data.map(plan => plan.id));
-                    const datePlanformPOST = {
-                        time: schedule,
-                        dateOrder: dateOrder,
-                        planId : maxId
-                    };
-                    console.log(datePlanformPOST);
-                    const datePlanResponsePOST = await axios.post(`${BASE_URL}/api/date-plans`, datePlanformPOST, {
-                        headers: {
-                            Authorization : `Bearer ${token}`,
-                        },
-                    });
-
-                    //console.log(`DATE PLAN status: ${datePlanResponsePOST.status}`);
+            
+           
+            const planExerciseResponsePOST = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            
+            const filteredExerciseIds = planExerciseResponsePOST.data
+            .filter(exercise => oldDatePlanIds.includes(exercise.datePlanId)) 
+            .map(exercise => exercise.id); 
 
 
-                    const DatePlanResponseGET = await axios.get(`${BASE_URL}/api/date-plans/all`,{
-                        headers:{
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-        
-                    const maxIddp = Math.max(...DatePlanResponseGET.data.map(dateplan => dateplan.id));
-
-
-                    const postData = exerciseData.map((item, index) => {
-                        return {
-                            setCount: item.sets, 
-                            repCount: item.reps, 
-                            restTime: item.rest, 
-                            sequence: index+1, 
-                            exerciseId: item.id,
-                            datePlanId: maxIddp, 
-                        };
-                    });
-
-                    console.log(postData);
-
-                    let allRequestsSuccessful = true;
-
-                    // const planExerciseResponsePOST = await axios.post(`${BASE_URL}/api/exercise-plans`, postData, {
-                    //     headers: {
-                    //         Authorization: `Bearer ${token}`,
-                    //     },
-                    // });
-                    //console.log(`DATE PLAN status: ${planExerciseResponsePOST.status}`);
-
-                    for (const item of postData) {
-                        try {
-                            const planExerciseResponsePOST = await axios.post(`${BASE_URL}/api/exercise-plans`, item, {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            });
-                
-                            if (planExerciseResponsePOST.status < 200 || planExerciseResponsePOST.status >= 300) {
-                                allRequestsSuccessful = false;
-                                break;  
-                            }
-                        } catch (error) {
-                            console.error('Error posting data:', error);
-                            allRequestsSuccessful = false;
-                            break;
-                        }
-                    }
-
-
-                    if (allRequestsSuccessful) {
-                        setModalSuccessVisible(true);
-                        setTimeout(() => {
-                            navigation.replace('CustomPlan', {
-                                planId: currentPlan,
-                                day: t,
-                                totalDays: totalDays,
-                                exerciseIds: updatedExerciseIds,
-                            });
-                        }, 3500);
-                    }
-                    
-                }
-                catch (error){
-                    console.error(error);
-                }
-                //console.log(`NUMBER EXERCISES THIS DAY: ${updatedExerciseIds.length}`);
+            for (const id of filteredExerciseIds) {
+                await axios.delete(`${BASE_URL}/api/exercise-plans/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, 
+                    },
+                });
             }
-            else{
-                try{
-                    await AsyncStorage.setItem('exerciseIds', updatedExerciseIds.join(',')); 
-                    const token = await AsyncStorage.getItem('accessToken');
-                    const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
 
-                    const userId = accountResponse.data.id;
-                    const PlanListResponse = await axios.get(`${BASE_URL}/api/plans/all`,{
-                        headers:{
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-
-                    const maxId = Math.max(...PlanListResponse.data.map(plan => plan.id));
-                    const datePlanformPOST = {
-                        time: schedule,
-                        dateOrder: dateOrder,
-                        planId : maxId
-                    };
-                    console.log(datePlanformPOST);
-                    const datePlanResponsePOST = await axios.post(`${BASE_URL}/api/date-plans`, datePlanformPOST, {
-                        headers: {
-                            Authorization : `Bearer ${token}`,
-                        },
-                    });
-
-                    //console.log(`DATE PLAN status: ${datePlanResponsePOST.status}`);
+            //console.log(`DATE PLAN status: ${datePlanResponsePOST.status}`);
 
 
-                    const DatePlanResponseGET = await axios.get(`${BASE_URL}/api/date-plans/all`,{
-                        headers:{
-                            Authorization: `Bearer ${token}`,
-                        },
-                    });
-        
-                    const maxIddp = Math.max(...DatePlanResponseGET.data.map(dateplan => dateplan.id));
+            const DatePlanResponseGET = await axios.get(`${BASE_URL}/api/date-plans?planId.equals=${planID}`,{
+                headers:{
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
+            const resDateId = DatePlanResponseGET.data
+                .filter(item => item.dateOrder === dayOrder)
+                .map(item => item.id); 
+            
+            const maxIddp = resDateId[0];
 
-                    const postData = exerciseData.map((item, index) => {
-                        return {
-                            setCount: item.sets, 
-                            repCount: item.reps, 
-                            restTime: item.rest, 
-                            sequence: index+1, 
-                            exerciseId: item.id,
-                            datePlanId: maxIddp, 
-                        };
-                    });
+            const formDatePlanChange = {
+                time: schedule,
+                dateOrder: dayOrder,
+                planId: planID   
+            }
 
-                    console.log(postData);
-
-                    let allRequestsSuccessful = true;
-
-                    // const planExerciseResponsePOST = await axios.post(`${BASE_URL}/api/exercise-plans`, postData, {
-                    //     headers: {
-                    //         Authorization: `Bearer ${token}`,
-                    //     },
-                    // });
-                    //console.log(`DATE PLAN status: ${planExerciseResponsePOST.status}`);
-
-                    for (const item of postData) {
-                        try {
-                            const planExerciseResponsePOST = await axios.post(`${BASE_URL}/api/exercise-plans`, item, {
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            });
-                
-                            if (planExerciseResponsePOST.status < 200 || planExerciseResponsePOST.status >= 300) {
-                                allRequestsSuccessful = false;
-                                break;  
-                            }
-                        } catch (error) {
-                            console.error('Error posting data:', error);
-                            allRequestsSuccessful = false;
-                            break;
-                        }
-                    }
-
-
-                    if (allRequestsSuccessful) {
-                        setModalSuccessVisible(true);
-                        setTimeout(() => {
-                            navigation.navigate('MyPlan');
-                        }, 3500);
-                    }
-                    
+            await axios.put(`${BASE_URL}/api/date-plans/${maxIddp}`, formDatePlanChange, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 }
-                catch (error){
-                    console.error(error);
-                }
-                console.log(`TOTAL EXERCISES THIS PLAN IS: ${updatedExerciseIds.length}`);
+            });
+
+            const postData = exerciseData.map((item, index) => {
+                return {
+                    setCount: item.sets, 
+                    repCount: item.reps, 
+                    restTime: item.rest, 
+                    sequence: index+1, 
+                    exerciseId: item.id,
+                    datePlanId: maxIddp, 
+                };
+            });
+
+            console.log(postData);
+
+            let allRequestsSuccessful = true;
+
+            // const planExerciseResponsePOST = await axios.post(`${BASE_URL}/api/exercise-plans`, postData, {
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // });
+            //console.log(`DATE PLAN status: ${planExerciseResponsePOST.status}`);
+
+            for (const item of postData) {
                 try {
-                    await AsyncStorage.removeItem('exerciseIds');
+                    const planExerciseResponsePOST = await axios.post(`${BASE_URL}/api/exercise-plans`, item, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+        
+                    if (planExerciseResponsePOST.status < 200 || planExerciseResponsePOST.status >= 300) {
+                        allRequestsSuccessful = false;
+                        break;  
+                    }
                 } catch (error) {
-                    console.error('Error removing exerciseIds from AsyncStorage:', error);
+                    console.error('Error posting data:', error);
+                    allRequestsSuccessful = false;
+                    break;
                 }
             }
+
+
+            if (allRequestsSuccessful) {
+                setModalSuccessVisible(true);
+                setTimeout(() => {
+                    navigation.navigate('RecustomizePlan', {
+                        token : token,
+                        planID: planID,
+                    });
+                }, 3500);
+            }
+            
+        }
+        catch (error){
+            console.error(error);
         }
     }
 
@@ -337,6 +237,40 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
     };
 
 
+    const init2 = async () => {
+        const token = await AsyncStorage.getItem('accessToken');
+        const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const userId = accountResponse.data.id;
+        const GetDatePlanResponse = await axios.get(`${BASE_URL}/api/date-plans?planId.equals=${planID}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        
+        const resDateId = GetDatePlanResponse.data
+                .filter(item => item.dateOrder === dayOrder)
+                .map(item => item.id); 
+        const ExercisePlanResponse = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const exercisePlanIds = ExercisePlanResponse.data
+                .filter(exercise => resDateId.includes(exercise.datePlanId))
+                .map(exercise => exercise.exerciseId);  
+        //console.log(`length: ${exercisePlanIds.length}`);
+        setExerciseIds(exercisePlanIds);
+        setOldDatePlanIds(resDateId);
+    }
+
+    useEffect(() => {
+       init2();
+    }, [navigation]);
+
 
     const QuicklyRef = async (newExerciseIds = exerciseIds) => {
         try {
@@ -344,12 +278,12 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
             const publicResponse = await axios.get(`${BASE_URL}/public/api/exercises/all`);
             const dataGET = publicResponse.data
                 .filter((exercise) => newExerciseIds.includes(exercise.id))
-                .map(({ publicImageUrl, id, caloConsume, name }) => {
+                .map(({ publicImageUrl, id, caloConsume, name, met, restTime, repCount, setCount }) => {
                     const existingExercise = exerciseData.find((item) => item.id === id);
                     return {
                         id: id,
                         imgsrc: publicImageUrl,
-                        propertyDetail: existingExercise ? existingExercise.propertyDetail : '5 sets|5 reps|rest: 20s',
+                        propertyDetail: existingExercise ? existingExercise.propertyDetail : `5 sets|5 reps|rest: 5s`,
                         sets: existingExercise ? existingExercise.sets : 5,
                         reps: existingExercise ? existingExercise.reps : 5,
                         rest: existingExercise ? existingExercise.rest : 20,
@@ -367,8 +301,10 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
             console.log(err);
         }
     };
-    useEffect(() => {
+
     
+    useEffect(() => {
+        //init2();
         QuicklyRef();
         
     }, [exerciseIds]); 
@@ -394,7 +330,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
     return (
-        <View style={[styles.container, {backgroundColor: selectedColor}]}>
+        <View style={styles.container}>
 
             <Header1 
                 title="Workout" 
@@ -464,12 +400,12 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('DateIndicatorPlan')}>
+                    {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('DateIndicatorPlan')}>
                         <Text style={styles.buttonText}>Previous</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     <TouchableOpacity style={styles.button} onPress={() => HandleNav()}>
-                        <Text style={styles.buttonText}>Add</Text>
+                        <Text style={styles.buttonText}>Complete Edit</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -551,7 +487,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
                             style={{ width: 150, height: 150 }}
                         />
                         
-                        <Text style={{ fontSize: 16, marginVertical: 10, fontStyle:'italic', color: '#fff' }}>Adding Custom Plan DAY {dateOrder} Successful! (step {dateOrder} / {route.params?.totalDays})</Text>
+                        <Text style={{ fontSize: 16, marginVertical: 10, fontStyle:'italic', color: '#fff' }}>Edit data Successful!</Text>
 
                         <TouchableOpacity onPress={closeModal2} style={{ alignContent: 'center',
                             width: '20%',
@@ -831,4 +767,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default CustomPlanScreen;
+export default CustomPlanEditingScreen;

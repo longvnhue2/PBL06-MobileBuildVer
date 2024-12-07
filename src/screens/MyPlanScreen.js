@@ -21,6 +21,8 @@ const MyPlanScreen = ({navigation}) => {
     const [PlanData2, setPlanData2] = useState([]);
     const [exercisePlanData, setExercisePlanData] = useState([]);
     const [PlanData, setPlanData] = useState([]);
+    const [currentUser, setCurrentUser] = useState(0);
+    const [isRefresh, setIsRefresh] = useState(false);
     const [filterPlan, setFilterPlan] = useState([])
 
 
@@ -33,6 +35,14 @@ const MyPlanScreen = ({navigation}) => {
             setIsLogin(true);
             setUsername(await AsyncStorage.getItem('username') || '');
             try {
+              const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                  headers: {
+                      Authorization: `Bearer ${token}`,
+                  },
+              });
+              const userId = accountResponse.data.id;
+              setCurrentUser(userId);
+              console.log(userId);
               const responsePLAN = await axios.get(`${BASE_URL}/api/plans/all`, {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -74,48 +84,53 @@ const MyPlanScreen = ({navigation}) => {
                 rating: data.rating,
                 subtitle1: `${plansWithExerciseCount[data.id] || 0} exercises`,
                 iconName: 'rocket',
+                userId: data.userId,
               }));
 
               setPlanData(GetPLAN);
               setFilterPlan(GetPLAN)
 
-              const planInstanceResponse = await axios.get(`${BASE_URL}/api/plan-instances/all`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              });
+              // const planInstanceResponse = await axios.get(`${BASE_URL}/api/plan-instances/all`, {
+              //   headers: {
+              //     Authorization: `Bearer ${token}`,
+              //   },
+              // });
 
-              const responseExercise_PlansInstance = await axios.get(`${BASE_URL}/api/exercise-plan-instances/all`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              });
+              // const responseExercise_PlansInstance = await axios.get(`${BASE_URL}/api/exercise-plan-instances/all`, {
+              //   headers: {
+              //     Authorization: `Bearer ${token}`,
+              //   },
+              // });
 
-              const responseDate_PlanInstance = await axios.get(`${BASE_URL}/api/date-plan-instances/all`, {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              });
+              // const responseDate_PlanInstance = await axios.get(`${BASE_URL}/api/date-plan-instances/all`, {
+              //   headers: {
+              //     Authorization: `Bearer ${token}`,
+              //   },
+              // });
 
-              const plansWithExerciseCount2 = responseDate_PlanInstance.data.reduce((acc, datePlan) => {
-                const matchingExercises = responseExercise_PlansInstance.data.filter(exercisePlan => exercisePlan.datePlanInstanceId === datePlan.id);
+              // const plansWithExerciseCount2 = responseDate_PlanInstance.data.reduce((acc, datePlan) => {
+              //   const matchingExercises = responseExercise_PlansInstance.data.filter(exercisePlan => exercisePlan.datePlanInstanceId === datePlan.id);
 
-                if (!acc[datePlan.planInstanceId]) {
-                  acc[datePlan.planInstanceId] = 0;
-                }
+              //   if (!acc[datePlan.planInstanceId]) {
+              //     acc[datePlan.planInstanceId] = 0;
+              //   }
 
-                acc[datePlan.planInstanceId] += matchingExercises.length;
+              //   acc[datePlan.planInstanceId] += matchingExercises.length;
 
-                return acc;
-              }, {});
-              console.log(plansWithExerciseCount2);
+              //   return acc;
+              // }, {});
+              // console.log(plansWithExerciseCount2);
 
-              const GETPLANinstance = planInstanceResponse.data.map((data) => ({
-                id: data.id,
-                title: data.name,
-                subtitle1: data.status,
-                subtitle2: `${plansWithExerciseCount2[data.id] || 0} exercises`,
-                iconName: 'rocket'
+              const GETPLANinstance = responsePLAN.data
+                .filter((data) => data.userId === userId) 
+                .map((data) => ({
+                    id: data.id,
+                    title: data.name,
+                    subtitle1: data.status,
+                    subtitle2: `${plansWithExerciseCount[data.id] || 0} exercises`,
+                    iconName: 'linux',
+                    totalDays: data.totalDays || 0,
+                    description: data.description
               }));
               setPlanData2(GETPLANinstance);
             } catch (err) {
@@ -128,7 +143,7 @@ const MyPlanScreen = ({navigation}) => {
         };
 
         checkAuth();
-      }, [navigation]) 
+      }, [navigation, isRefresh]) 
     );
 
     const handleChangeInputSearch = (text) => {
@@ -155,7 +170,7 @@ const MyPlanScreen = ({navigation}) => {
                 <View style={styles.titleContainer1}>
                     <Text style={styles.titleText}>My Plan:</Text>
                     <TouchableOpacity style={styles.buttonTitle} onPress={() => navigation.navigate('DateIndicatorPlan')}>
-                        <Text style={styles.buttonText}>+ Create Plan</Text>
+                        <Text style={styles.buttonText}>+ Create a custom Plan</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -163,12 +178,17 @@ const MyPlanScreen = ({navigation}) => {
                     {PlanData2.map((plan, index) => (
                         <PlanContent
                             key={index}
+                            planID={plan.id}
                             navigation={navigation}
                             title={plan.title}
                             subtitle1={plan.subtitle1}
                             subtitle2={plan.subtitle2}
                             avgrating={plan.rating}
                             iconName={plan.iconName}
+                            setIsRefresh={setIsRefresh}
+                            totalDays={plan.totalDays}
+                            description={plan.description}
+                
                         />
                     ))}
                 </View>
@@ -188,21 +208,24 @@ const MyPlanScreen = ({navigation}) => {
                   
                 </View>
                 
-                <View style={{marginBottom: 20, marginTop: 20}}>
-                    {PlanData.map((plan, index) => (
-                        <PlanRecommendContent
-                            key={index}
-                            navigation={navigation}
-                            id={plan.id}
-                            totalDays={plan.total_day}
-                            title={plan.title}
-                            subtitle1={plan.subtitle1}
-                            subtitle2={plan.subtitle2}
-                            avgrating={plan.rating}
-                            iconName={plan.iconName}
-                        />
-                    ))}
-                </View>
+                <View style={{ marginBottom: 20, marginTop: 20 }}>
+                  {PlanData.filter((plan) => 
+                      plan.status === 'PUBLIC' || 
+                      ((plan.status === 'PRIVATE' || plan.status === 'PENDING') && plan.userId === currentUser)
+                  ).map((plan, index) => (
+                      <PlanRecommendContent
+                          key={index}
+                          navigation={navigation}
+                          id={plan.id}
+                          totalDays={plan.total_day}
+                          title={plan.title}
+                          subtitle1={plan.subtitle1}
+                          subtitle2={plan.subtitle2}
+                          avgrating={plan.rating}
+                          iconName={plan.iconName}
+                      />
+                  ))}
+              </View>
             </ScrollView>
 
 
@@ -240,7 +263,7 @@ const styles = StyleSheet.create({
         margin: '4%',
     },
     buttonTitle: {
-        width: 150,
+        width: 250,
         height: 50,
         borderWidth: 2, 
         borderColor: 'white', 

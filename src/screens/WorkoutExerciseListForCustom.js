@@ -512,13 +512,14 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                 </TouchableOpacity>
                     
                 
-                <TouchableOpacity style={[styles.button, {alignItems:'center', alignSelf:'center', marginVertical: 20}]} onPress={
+                {/* <TouchableOpacity style={[styles.button, {alignItems:'center', alignSelf:'center', marginVertical: 20}]} onPress={
                     () => {
+                        route.params.setExerciseIds(route.params.exerciseIds);
                         navigation.navigate('CustomPlan');
                     }
                 }>
                     <Text style={[styles.text, {textAlign:'center'}]}>  Confirm Add</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
 
                 

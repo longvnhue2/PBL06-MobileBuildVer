@@ -8,6 +8,9 @@ const PlanRecommendContent = (props) => {
     return <TouchableOpacity onPress={() => props.navigation.navigate('Plan', {
         planID: props.id,
         totalDays: props.totalDays,
+        numExercises : props.subtitle1,
+        namePlan : props.title,
+        avgrating: props.avgrating
     })}><LinearGradient 
         colors={['#00687c', '#022b33']}
         start={{ x: 0, y: 0 }}
