@@ -27,7 +27,8 @@ const RecustomizePlanScreen = ({navigation, route}) => {
     const [dateOrderDEL, setDateOrderDEL] = useState(0);
     const [modalSuccessVisible, setModalSuccessVisible] = useState(false);
     const [ttoken, setToken] = useState(null);
-
+    const [topDateOrder, setTopDateOrder] = useState(0);
+    const [message, setMessage] = useState('');
 
     const closeModal2 = () => {
         setModalSuccessVisible(false);
@@ -38,6 +39,35 @@ const RecustomizePlanScreen = ({navigation, route}) => {
         setToggleDEL(!toggleDEL);
     } 
 
+    const handleAdd = async () => {
+        try{
+            const token = await AsyncStorage.getItem('accessToken');
+            const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const userId = accountResponse.data.id;
+            const formPOST = {
+                time: '20:00',
+                dateOrder: topDateOrder + 1,
+                planId: planID
+            }
+            const POSTresponse = await axios.post(`${BASE_URL}/api/date-plans`, formPOST, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (POSTresponse.status >= 200 && POSTresponse.status <= 300){
+                setTotalDays(totalDays + 1);
+                setMessage('Successfully Added 1 more day!');
+                setModalSuccessVisible(true);
+            }
+        }
+        catch(e){
+            console.error(e);
+        }
+    }
 
     const handleDELdate = async () => {
         const token = await AsyncStorage.getItem('accessToken');
@@ -88,6 +118,7 @@ const RecustomizePlanScreen = ({navigation, route}) => {
                 }
                 setTotalDays(totalDays - 1);
                 setToggleDEL(!toggleDEL);
+                setMessage(`Remove Custom Plan DAY ${dateOrderDEL} Successful!`);
                 setModalSuccessVisible(true);
             }
             catch(err){
@@ -147,8 +178,10 @@ const RecustomizePlanScreen = ({navigation, route}) => {
                                 `rgb(${Math.floor(Math.random() * 150)+50}, ${Math.floor(Math.random() * 150)+50}, ${Math.floor(Math.random() * 150)+50})`,
                             ],
                         }));
+                        const maxDateOrder = Math.max(...resList.map(item => item.dateOrder));
+                        setTopDateOrder(maxDateOrder);
                         setAppointments(resList);
-    
+                        
                         const PlanResponse = await axios.get(`${BASE_URL}/api/plans/${planID}`, {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -185,7 +218,7 @@ const RecustomizePlanScreen = ({navigation, route}) => {
     
             checkAuth();
             
-        }, [navigation, planID]) 
+        }, [navigation, planID, totalDays]) 
     );
 
     if (loading) {
@@ -231,7 +264,11 @@ const RecustomizePlanScreen = ({navigation, route}) => {
             name='RecustomizePlan'
         />
 
-        <View style={{marginTop:'4%', height:'65%'}}>
+        
+        <TouchableOpacity style={[styles.addButton, {alignSelf:'flex-end', marginRight:15}]} onPress={handleAdd}>
+                <Text style={[styles.buttonText, {fontSize:18, fontWeight:'800'}]}>+ Add 1 more day</Text>
+        </TouchableOpacity>
+        <View style={{marginTop:'5%', height:'55%'}}>
         <FlatList 
             contentContainerStyle={styles.listContainer}
             data={appointments}
@@ -241,16 +278,18 @@ const RecustomizePlanScreen = ({navigation, route}) => {
         />
         </View>
 
-        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop:15}}>
             <View style={{marginLeft: 20}}>
             <Text style={styles.textDesc}>Plan Name: {thisData.title}</Text>
             <Text style={styles.textDesc}>Total exercises: {thisData.numExercises}</Text>
             <Text style={styles.textDesc}>Length: {thisData.totalDays} day(s)</Text>
             </View>
-
+            <View style={{flexDirection:'column',  justifyContent: 'space-between', marginBottom:30}}>
+            
             <TouchableOpacity style={[styles.actionButton, {alignSelf:'center', height:50, marginRight:15}]} onPress={() => navigation.navigate('MyPlan')}>
                 <Text style={[styles.buttonText, {fontSize:14, fontWeight:'800'}]}>Confirm recustomize</Text>
             </TouchableOpacity>
+            </View>
         </View>
 
         <View style={styles.footer}>
@@ -297,7 +336,7 @@ const RecustomizePlanScreen = ({navigation, route}) => {
                             style={{ width: 150, height: 150 }}
                         />
                         
-                        <Text style={{ fontSize: 16, marginVertical: 10, fontStyle:'italic', color: '#fff' }}>Remove Custom Plan DAY {dateOrderDEL} Successful!</Text>
+                        <Text style={{ fontSize: 16, marginVertical: 10, fontStyle:'italic', color: '#fff' }}>{message}</Text>
 
                         <TouchableOpacity onPress={closeModal2} style={{ alignContent: 'center',
                             width: '20%',
@@ -383,6 +422,16 @@ const styles = StyleSheet.create({
         borderWidth:2,
         borderColor:'#fff',
         marginRight: 10,
+    },
+    addButton: {
+        marginTop:20,
+        backgroundColor: 'rgb(20,100,52)',
+        padding:8,
+        borderRadius: 5,
+        borderWidth:2,
+        borderColor:'#fff',
+        marginRight: 10,
+        marginBottom:10
     },
     actionButtonDanger: {
         marginTop:5,
