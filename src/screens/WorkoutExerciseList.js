@@ -263,7 +263,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             break;
                         }
                 }
-                setFilterData(exerciseData)
+                setFilterData(DataGET)
             }
             catch (error) {
                 console.error('Error fetching exercise data:', error);

@@ -41,13 +41,13 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderRadius: 30,
     width: '70%',
-    height: '80%',
+    height: '100%',
     paddingHorizontal: 15
   },
   input: {
     fontSize: 20,
     color: 'white',
-    marginLeft: 8
+    marginLeft: 8,
   }
 })
 

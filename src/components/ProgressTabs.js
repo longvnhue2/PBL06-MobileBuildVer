@@ -2,12 +2,12 @@ import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 const Progresstabs = (props) => {
     const {navigation, target} = props
-    const Tabstxt = ['Profile', 'History', 'Insights'];
+    const Tabstxt = ['Profile', 'History', 'Insight'];
 
     const handleTabPress = (tab) => {
         if (tab === 'Profile') navigation.navigate('Profile');
         else if (tab === 'History') navigation.navigate('ProgressCalendar');
-        else if (tab === 'Insights') navigation.navigate('InsightsScreen');
+        else if (tab === 'Insight') navigation.navigate('InsightScreen');
     };
 
     return ( 

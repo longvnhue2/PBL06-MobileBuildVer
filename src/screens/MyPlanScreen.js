@@ -167,7 +167,7 @@ const MyPlanScreen = ({navigation}) => {
 
 
             <ScrollView contentContainerStyle={styles.bodyContent}>
-                <View style={styles.titleContainer1}>
+                {/* <View style={styles.titleContainer1}>
                     <Text style={styles.titleText}>My Plan:</Text>
                     <TouchableOpacity style={styles.buttonTitle} onPress={() => navigation.navigate('DateIndicatorPlan')}>
                         <Text style={styles.buttonText}>+ Create a custom Plan</Text>
@@ -191,7 +191,7 @@ const MyPlanScreen = ({navigation}) => {
                 
                         />
                     ))}
-                </View>
+                </View> */}
 
                 <View style={styles.titleContainer2}>
                   <Text style={styles.titleText}>Recommend</Text>
@@ -255,7 +255,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: '4%',
+        padding: '4%',
+        marginTop: '4%',
     },
     titleContainer1: {
         flexDirection: 'row',

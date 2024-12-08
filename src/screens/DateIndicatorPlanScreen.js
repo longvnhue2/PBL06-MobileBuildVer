@@ -11,8 +11,6 @@ import BASE_URL from "../../IPHelper";
 import { useColor } from "../context/ColorContext";
 
 const DateIndicatorPlanScreen = ({navigation, route}) => {
-
-const DateIndicatorPlanScreen = ({navigation}) => {
     const {selectedColor} = useColor();
     const [description, setDescription] = useState(''); 
     const [planName, setPlanName] = useState('');
@@ -384,6 +382,5 @@ const styles = StyleSheet.create({
         
       },
 });
-}
 
 export default DateIndicatorPlanScreen

@@ -22,7 +22,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
     const {selectedColor} = useColor()
     // const exerciseData = [
     //     {
-    //         imgsrc: require('../../assets/dorothy.png'),
+    //         imgsrc: require('../..//dorothy.png'),
     //         text: 'Pull up (Recommended)',
     //         propertyDetail: '2 sets, 8 reps',
     //     },

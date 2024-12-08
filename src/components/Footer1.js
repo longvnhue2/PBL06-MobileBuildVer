@@ -34,7 +34,7 @@ const Footer1 = (props) => {
                     <Icon name="compass" size={45} color="black" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => props.navigation.navigate('MyPlan')}>
+                <TouchableOpacity onPress={() => props.navigation.navigate('PlanPortal')}>
                     <Icon name="home" size={45} color="black" />
                 </TouchableOpacity>
 

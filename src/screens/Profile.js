@@ -146,7 +146,7 @@ const Profile = ({ navigation }) => {
                     Authorization: `Bearer ${Token}`
                 }
             })
-
+            
             const updateUserAttributesPromises = userAttributes.map(attribute => {
                 return axios.put(`${BASE_URL}/api/user-attributes/${attribute.id}`, attribute, {
                     headers: {

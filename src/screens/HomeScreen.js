@@ -25,9 +25,7 @@ const HomeScreen = (props) => {
     <Button title="FCMTokenTesting" onPress={() => props.navigation.navigate('FCMTokenTesting')}/>
     <Button title="RecustomizePlan" onPress={() => props.navigation.navigate('RecustomizePlan')}/>
     <Button title="CustomPlanEditing" onPress={() => props.navigation.navigate('CustomPlanEditing')}/>
-    
-  
-
+    <Button title="PlanPortal" onPress={() => props.navigation.navigate('PlanPortal')}/>
   </View>
 };
 

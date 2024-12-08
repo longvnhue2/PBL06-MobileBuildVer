@@ -123,7 +123,7 @@ const HomieScr = ({ navigation }) => {
         <View style={styles.container}>
             <Header1 title="HomeZ" navigation={navigation} isLogin={isLogin} username={username} />
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={[styles.body, {backgroundColor: selectedColor}]}>
+                <View style={styles.body}>
                     <Image
                         style={styles.titleIMG}
                         source={require('../../assets/accel.jpg')}
@@ -145,7 +145,7 @@ const HomieScr = ({ navigation }) => {
                         )}
                     </View>
                     
-                    <View style={styles.mainContainer}>
+                    <View style={[styles.mainContainer, {backgroundColor: selectedColor}]}>
                     <SnowFallEffect from={fromHeight} to={toEnd}/>
                         <TouchableOpacity style={[styles.button, { marginTop: 50, alignSelf: 'center', justifyContent: 'center' }]}
                             onPress={() => navigation.navigate('Welcome')}>
