@@ -57,16 +57,16 @@ const TopPlan = (props) => {
                 <Text style={styles.title}>{title}</Text>
             </View>
 
-            <View style={styles.cardContainer}>
-                <TouchableOpacity onPress={handlePrev}>
-                    <Icon name='chevron-left' size={35} color={'black'} />
-                </TouchableOpacity>
+            <View style={styles.card}>
+                <ImageBackground
+                    source={require('../../assets/bg-template.jpg')}
+                    style={styles.backgroundImage}
+                >
+                    <TouchableOpacity onPress={handlePrev}>
+                        <Icon name='chevron-left' size={35} color={'rgba(0, 0, 0, 0.5)'} />
+                    </TouchableOpacity>
 
-                <View style={styles.card}>
-                    <ImageBackground
-                        source={require('../../assets/bg-template.jpg')}
-                        style={styles.backgroundImage}
-                    >
+                    <View>
                         <Animated.View style={[styles.animatedContainer, { transform: [{ translateX: translateX }] }]}>
                             <TouchableOpacity onPress={() => props.navigation.navigate('MyPlan')}>
                                 <View style={styles.cardContent}>
@@ -78,20 +78,20 @@ const TopPlan = (props) => {
                                 </View>
                             </TouchableOpacity>
                         </Animated.View>
-                    </ImageBackground>
-                </View>
 
-                <TouchableOpacity onPress={handleNext}>
-                    <Icon name='chevron-right' size={35} color={'black'} />
-                </TouchableOpacity>
-            </View>
+                        <View style={styles.pagination}>
+                            {topPlans.map((_, index) => (
+                                <TouchableOpacity key={`dot-${index}`} onPress={() => goToSlide(index)}>
+                                    <Text style={[styles.dot, currentIndex === index && styles.activeDot]}>&bull;</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
 
-            <View style={styles.pagination}>
-                {topPlans.map((_, index) => (
-                    <TouchableOpacity key={`dot-${index}`} onPress={() => goToSlide(index)}>
-                        <Text style={[styles.dot, currentIndex === index && styles.activeDot]}>&bull;</Text>
+                    <TouchableOpacity onPress={handleNext}>
+                        <Icon name='chevron-right' size={35} color={'rgba(0, 0, 0, 0.5)'} />
                     </TouchableOpacity>
-                ))}
+                </ImageBackground>
             </View>
         </View>
     );
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     card: {
-        width: '70%',
+        width: '100%',
         height: 300, 
         overflow: 'hidden',
         borderRadius: 20,
@@ -117,8 +117,19 @@ const styles = StyleSheet.create({
     backgroundImage: {
         width: '100%',
         height: '100%',
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    animatedContainer: {
+        width: '80%',
+    },
+    sliderContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'red'
     },
     cardContent: {
         flexDirection: 'row',
@@ -141,7 +152,6 @@ const styles = StyleSheet.create({
     pagination: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 10,
     },
     dot: {
         fontSize: 50,

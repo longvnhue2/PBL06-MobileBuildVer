@@ -9,6 +9,7 @@ import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import SnowFallEffect from "../effects/SnowFlake";
 import { useColor } from "../context/ColorContext";
+import ImageSlide from "../components/ImageSlide";
 
 const {fromWidth, fromHeight} = Dimensions.get('window');
 const HomieScr = ({ navigation }) => {
@@ -27,6 +28,19 @@ const HomieScr = ({ navigation }) => {
     const [waist, setWaist] = useState('N/A');
     const [height, setHeight] = useState('N/A');
     const [weight, setWeight] = useState('N/A');
+
+    const imageData = [
+        { source: require('../../assets/imageData1.jpg') },
+        { source: require('../../assets/imageData2.jpg') },
+        { source: require('../../assets/imageData3.jpg') },
+        { source: require('../../assets/imageData4.jpg') },
+        { source: require('../../assets/imageData5.jpg') },
+        { source: require('../../assets/imageData6.jpg') },
+        { source: require('../../assets/imageData7.jpg') },
+        { source: require('../../assets/imageData8.jpg') },
+        { source: require('../../assets/imageData9.jpg') },
+        { source: require('../../assets/imageData10.jpg') },
+    ];
 
     // GET DATA USER_ATTRIBUTE
     const GetData = async () => {
@@ -127,6 +141,11 @@ const HomieScr = ({ navigation }) => {
                     <Image
                         style={styles.titleIMG}
                         source={require('../../assets/accel.jpg')}
+                    />
+
+                    <ImageSlide
+                        imageData={imageData}
+                        numberOfSlide={5}
                     />
 
                     <View style={styles.title2Container}>

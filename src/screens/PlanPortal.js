@@ -41,7 +41,7 @@ const PlanPortal = (props) => {
     const getAllPlanInstance = async (userId) => {
         const accessToken = await AsyncStorage.getItem('accessToken')
         try {
-            const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=1068`, {
+            const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${userId}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -78,7 +78,7 @@ const PlanPortal = (props) => {
                 name={'PlanPortal'}
             />
             
-            <ScrollView style={styles.bodyContainer}>
+            <ScrollView style={styles.bodyContainer} nestedScrollEnabled={true}>
                 <TopPlan
                     title='Top plan'
                     data={planData}

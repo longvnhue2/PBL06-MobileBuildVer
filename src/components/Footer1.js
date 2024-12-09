@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { TouchableOpacity, View, StyleSheet, Text, Modal, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { useColor } from "../context/ColorContext";
+import { ScrollView } from "react-native";
 
 const colors = [
     // pink
@@ -59,19 +60,40 @@ const Footer1 = (props) => {
             >
                 <View style={styles.modalContainer}>
                     <Text style={styles.modalTitle}>Select Background Color</Text>
-                    <FlatList
-                        data={colors}
-                        keyExtractor={(item) => item}
-                        numColumns={3}
-                        renderItem={({ item }) => (
+
+                    <ScrollView style={styles.modalContent}>
+                        <View style={styles.titleTextContainer}>
+                            <Text style={styles.titleText}>Default color:</Text>
+                        </View>
+
+                        <View style={styles.defaultColorContainer}>
+                            
                             <TouchableOpacity
-                                style={[styles.colorOption, { backgroundColor: item }]}
+                                style={[styles.colorOption, { backgroundColor: 'rgb(34,50,52)' }]}
                                 onPress={() => {
-                                    setSelectedColor(item);
+                                    setSelectedColor('rgb(34,50,52)');
                                 }}
                             />
-                        )}
-                    />
+                        </View>
+                        <View style={styles.titleTextContainer}>
+                            <Text style={styles.titleText}>Custom colors:</Text>
+                        </View>
+                        <FlatList
+                            data={colors}
+                            keyExtractor={(item) => item}
+                            numColumns={3}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={[styles.colorOption, { backgroundColor: item }]}
+                                    onPress={() => {
+                                        setSelectedColor(item);
+                                    }}
+                                />
+                            )}
+                            scrollEnabled={false}
+                        />
+                    </ScrollView>
+
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={() => setModalVisible(false)}
@@ -110,6 +132,16 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 15,
         color: 'white',
+    },
+    titleTextContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    titleText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     colorOption: {
         width: 80,
