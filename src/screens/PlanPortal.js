@@ -38,10 +38,15 @@ const PlanPortal = (props) => {
         }
     }
 
-    const getAllPlanInstance = async (userId) => {
+    const getAllPlanInstance = async () => {
         const accessToken = await AsyncStorage.getItem('accessToken')
         try {
-            const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=1068`, {
+            const { data: getAccount } = await axios.get(`${BASE_URL}/api/account`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${getAccount.id}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -52,6 +57,13 @@ const PlanPortal = (props) => {
             console.error("Error getting plan instance:", error)
         }
     }
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+          getAllPlanInstance();
+        });
+        return unsubscribe;
+      }, [navigation]);
 
     const getUserId = async () => {
         const accessToken = await AsyncStorage.getItem('accessToken')
@@ -108,6 +120,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderWidth: 1,
         borderColor: 'white',
+        marginBottom: 30
     },
     footer: {
         position: "absolute",

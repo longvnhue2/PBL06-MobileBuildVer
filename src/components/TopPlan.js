@@ -59,7 +59,7 @@ const TopPlan = (props) => {
 
             <View style={styles.cardContainer}>
                 <TouchableOpacity onPress={handlePrev}>
-                    <Icon name='chevron-left' size={35} color={'black'} />
+                    <Icon name='chevron-left' size={35} color={'white'} />
                 </TouchableOpacity>
 
                 <View style={styles.card}>
@@ -82,7 +82,7 @@ const TopPlan = (props) => {
                 </View>
 
                 <TouchableOpacity onPress={handleNext}>
-                    <Icon name='chevron-right' size={35} color={'black'} />
+                    <Icon name='chevron-right' size={35} color={'white'} />
                 </TouchableOpacity>
             </View>
 
@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: 'bold',
         marginBottom: 20,
+        color:'#fff'
     },
     cardContainer: {
         flexDirection: 'row',
