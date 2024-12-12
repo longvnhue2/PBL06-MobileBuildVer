@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useColor } from '../context/ColorContext'
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
+
 const MyPlan = (props) => {
     const { title, data, navigation} = props
     const { selectedColor } = useColor()
@@ -36,6 +37,16 @@ const MyPlan = (props) => {
         return () => clearInterval(timer);
     })
 
+    useEffect(() => {
+        if (flatListRef.current && data.length > 0) {
+            flatListRef.current.scrollToIndex({
+                index: 0,
+                animated: false,
+                viewPosition: 0.5,
+            });
+        }
+    }, [data]);
+
     const goToSlide = (index) => {
         if (index === currentIndex) return;
         flashListRefScrollToIndex(index);
@@ -47,7 +58,7 @@ const MyPlan = (props) => {
     };
 
     const handleScrollEnd = () => {
-        const cardWidth = 210; // Width of each card
+        const cardWidth = 210;
         const index = Math.round(scrollOffset / cardWidth);
         flashListRefScrollToIndex(index % data.length);
     };
@@ -77,18 +88,26 @@ const MyPlan = (props) => {
                         <Icon name='chevron-left' size={35} color={'black'} />
                     </TouchableOpacity>
 
-                    <View style={styles.flatListContainer}>
+                    <View
+                        style={[
+                            styles.flatListContainer,
+                        ]}
+                    >
                         <FlatList
                             ref={flatListRef}
                             data={data}
                             horizontal
                             showsHorizontalScrollIndicator={false}
                             renderItem={renderItem}
-                            keyExtractor={item => item.id.toString()}
+                            keyExtractor={(item) => item.id.toString()}
                             onScroll={handleScroll}
                             onMomentumScrollEnd={handleScrollEnd}
-                            decelerationRate='fast'
+                            decelerationRate="fast"
+                            contentContainerStyle={{
+                                paddingHorizontal: styles.card.width / 2,
+                            }}
                         />
+
                     </View>
 
                     <TouchableOpacity onPress={handleNext}>
@@ -119,7 +138,7 @@ const MyPlan = (props) => {
 
 const styles = StyleSheet.create({
     container: {
-        height: '50%',
+        marginBottom: 125,
     },
     noPlanContainer: {
         height: '65%',
@@ -148,21 +167,20 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 25,
         fontWeight: 'bold',
+        color: 'white',
         marginBottom: 20,
     },
     cardContainer: {
-        height: '50%',
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     flatListContainer: {
         width: '80%',
-        height: '60%',
+        height: '70%',
     },
     card: {
         backgroundColor: '#f9c2ff',
-        padding: 20,
         marginHorizontal: 20,
         borderRadius: 10,
         width: 200,

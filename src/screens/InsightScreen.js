@@ -9,15 +9,62 @@ import PlanContent from '../components/PlanContent'
 import axios from 'axios'
 import BASE_URL from '../../IPHelper'
 import SearchBar from '../components/SearchBar'
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
+
 
 const InsightScreen = (props) => {
     const { navigation } = props
     const {selectedColor} = useColor()
     const username = AsyncStorage.getItem('username')
+    const [inputText, setInputText] = useState('');
 
     const [planData, setPlanData] = useState([]);
     const [filterPlan, setFilterPlan] = useState([]);
     const [isRefresh, setIsRefresh] = useState(false);
+    const [devicePushToken, setDevicePushToken] = useState("");
+    const [expoPushToken, setExpoPushToken] = useState("");
+
+
+    useEffect(() => {
+        const notificationListener = Notifications.addNotificationReceivedListener(notification => {
+          console.log('Notification received:', notification);
+        });
+      
+        const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+          console.log('Notification clicked:', response);
+        });
+      
+        return () => {
+          Notifications.removeNotificationSubscription(notificationListener);
+          Notifications.removeNotificationSubscription(responseListener);
+        };
+      }, []);
+
+    
+    useEffect(() => {
+    const registerForPushNotifications = async () => {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+        }
+        if (finalStatus !== "granted") {
+        alert("Failed to get push token!");
+        return;
+        }
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
+        const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+        const token2 = (await Notifications.getDevicePushTokenAsync()).data;
+        setExpoPushToken(token);
+        setDevicePushToken(token2);
+        console.log("Expo Push Token:", token);
+        console.log("Device Push Token:", token2);
+    };
+
+    registerForPushNotifications();
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -107,10 +154,10 @@ const InsightScreen = (props) => {
                 </View>
 
                 <View style={styles.searchContainer}>
-                    <SearchBar
+                    {/* <SearchBar
                         placeholder="Name ..."
                         onChange={handleChangeInputSearch}
-                    />
+                    /> */}
                 </View>
 
                 <View style={{marginBottom: 20}}>
@@ -127,6 +174,7 @@ const InsightScreen = (props) => {
                             setIsRefresh={setIsRefresh}
                             totalDays={plan.totalDays}
                             description={plan.description}
+                            devicePushToken={devicePushToken}
                         />
                     ))}
                 </View>

@@ -13,12 +13,46 @@ const PlanContent = (props) => {
     const [statusCode, setStatusCode] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
 
+    const handleSign = async() => {
+        const nows = new Date();
+        try{
+            const token = await AsyncStorage.getItem('accessToken');
+            const formAdd = {
+                name:props.title,
+                description: "signed plan",
+                startDate: nows.toISOString(),
+                totalDays: props.totalDays,
+                status: "IN_PROGRESS",
+                deviceToken: props.devicePushToken,
+                planId: props.planID
+            }
+            const POSTinstanceResponse = await axios.post(`${BASE_URL}/api/plan-instances`, formAdd, {
+                headers:{
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setStatusCode(POSTinstanceResponse.status);
+            setShowMessage(true); 
+                setTimeout(() => {
+                    setShowMessage(false); 
+                }, 1250);
+            if (POSTinstanceResponse.status >= 200 && POSTinstanceResponse.status <= 300){
+                props.navigation.navigate("PlanPortal");
+            }
+        }
+        catch(e){
+            console.error(e);
+        }
+        setIsVisible(false);
+    }
+
     const handleOutsidePress = () => {
         setIsVisible(!isVisible);
         console.log("CLICKED OUTSIDE!");
     };
 
     const handleEDIT = () => {
+        setIsVisible(false);
         props.navigation.navigate('DateIndicatorPlan', {
             method: 'edit',
             totalDays: props.totalDays,
@@ -111,7 +145,7 @@ const PlanContent = (props) => {
                 <View style={styles.comboBox}>
                     <TouchableOpacity
                         style={styles.comboItem1}
-                        // onPress={() => handleEDIT()}
+                        onPress={() => handleSign()}
                     >
                         <Text style={styles.comboText2}>Start plan!</Text>
                     </TouchableOpacity>

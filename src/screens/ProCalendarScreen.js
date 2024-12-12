@@ -42,7 +42,7 @@ const ProgressCalendar = ({ navigation }) => {
     }
 
     return (
-        <View style={[styles.container, {backgroundColor: selectedColor}]}>
+        <View style={[styles.container, {backgroundColor: '#10132A'}]}>
             {/* Header */}
             <Header1 
                 title="Profile" 

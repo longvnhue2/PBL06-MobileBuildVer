@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from "react";
-import { Text, TouchableOpacity, View, StyleSheet, ScrollView, Modal, Platform, ActivityIndicator, TextInput} from 'react-native';
+import { Text, TouchableOpacity, View, StyleSheet, Modal, Platform, ActivityIndicator, TextInput} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import Slider from "@react-native-community/slider";
 import Header1 from "../components/Header1";
 import Footer1 from "../components/Footer1";

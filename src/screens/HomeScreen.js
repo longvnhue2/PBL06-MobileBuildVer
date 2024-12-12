@@ -1,8 +1,9 @@
 import React from "react";
 import { Text, StyleSheet, View, Button} from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 const HomeScreen = (props) => {
-  return <View>
+  return <ScrollView>
     <Text style={styles.text}>HomeScreen</Text>
     <Button title="???" onPress={() => props.navigation.navigate('testingNavi')}/>
     <Button title="Login Screen" onPress={() => props.navigation.navigate('LoginScreen')}/>
@@ -26,7 +27,8 @@ const HomeScreen = (props) => {
     <Button title="RecustomizePlan" onPress={() => props.navigation.navigate('RecustomizePlan')}/>
     <Button title="CustomPlanEditing" onPress={() => props.navigation.navigate('CustomPlanEditing')}/>
     <Button title="PlanPortal" onPress={() => props.navigation.navigate('PlanPortal')}/>
-  </View>
+    <Button title="Insight" onPress={() => props.navigation.navigate('InsightScreen')}/>
+  </ScrollView>
 };
 
 const styles = StyleSheet.create({

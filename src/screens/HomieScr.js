@@ -30,16 +30,16 @@ const HomieScr = ({ navigation }) => {
     const [weight, setWeight] = useState('N/A');
 
     const imageData = [
-        { source: require('../../assets/imageData1.jpg') },
-        { source: require('../../assets/imageData2.jpg') },
-        { source: require('../../assets/imageData3.jpg') },
-        { source: require('../../assets/imageData4.jpg') },
-        { source: require('../../assets/imageData5.jpg') },
-        { source: require('../../assets/imageData6.jpg') },
-        { source: require('../../assets/imageData7.jpg') },
-        { source: require('../../assets/imageData8.jpg') },
-        { source: require('../../assets/imageData9.jpg') },
-        { source: require('../../assets/imageData10.jpg') },
+        { id: 0, source: require('../../assets/imageData1.jpg') },
+        { id: 1, source: require('../../assets/imageData2.jpg') },
+        { id: 2, source: require('../../assets/imageData3.jpg') },
+        { id: 3, source: require('../../assets/imageData4.jpg') },
+        { id: 4, source: require('../../assets/imageData5.jpg') },
+        { id: 5, source: require('../../assets/imageData6.jpg') },
+        { id: 6, source: require('../../assets/imageData7.jpg') },
+        { id: 7, source: require('../../assets/imageData8.jpg') },
+        { id: 8, source: require('../../assets/imageData9.jpg') },
+        { id: 9, source: require('../../assets/imageData10.jpg') },
     ];
 
     // GET DATA USER_ATTRIBUTE
@@ -138,14 +138,8 @@ const HomieScr = ({ navigation }) => {
             <Header1 title="HomeZ" navigation={navigation} isLogin={isLogin} username={username} />
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
                 <View style={styles.body}>
-                    <Image
-                        style={styles.titleIMG}
-                        source={require('../../assets/accel.jpg')}
-                    />
-
                     <ImageSlide
-                        imageData={imageData}
-                        numberOfSlide={5}
+                        data={imageData}
                     />
 
                     <View style={styles.title2Container}>

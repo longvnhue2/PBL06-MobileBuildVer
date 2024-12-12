@@ -69,7 +69,7 @@ const Profile = ({ navigation }) => {
         }
 
         let ava = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            mediaTypes: ImagePicker.MediaType.All,
             allowsEditing: true,
             aspect: [4, 4],
             quality: 1

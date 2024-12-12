@@ -17,12 +17,23 @@ const PlanPortal = (props) => {
     const [planData, setPlanData] = useState([]);
     const [planInstanceData, setPlanInstanceData] = useState([]);
 
+    const bgImage = [
+        { id: 0, source: require('../../assets/bg-image1.jpg') },
+        { id: 1, source: require('../../assets/bg-image2.jpg') },
+        { id: 2, source: require('../../assets/bg-image3.jpg') },
+        { id: 3, source: require('../../assets/bg-image4.jpg') },
+        { id: 4, source: require('../../assets/bg-image5.jpg') },
+        { id: 5, source: require('../../assets/bg-image6.jpg') },
+        { id: 6, source: require('../../assets/bg-image7.jpg') },
+        { id: 7, source: require('../../assets/bg-image8.jpg') },
+        { id: 8, source: require('../../assets/bg-image9.jpg') },
+        { id: 9, source: require('../../assets/bg-image10.jpg') },
+    ]
+
     useEffect(() => {
         const fetchData = async () => {
-            const accessToken = await AsyncStorage.getItem('accessToken')
-            const userId = await getUserId();
             await getAllPlan();
-            await getAllPlanInstance(userId);
+            await getAllPlanInstance();
         }
         fetchData();
     }, [])
@@ -38,10 +49,15 @@ const PlanPortal = (props) => {
         }
     }
 
-    const getAllPlanInstance = async (userId) => {
+    const getAllPlanInstance = async () => {
         const accessToken = await AsyncStorage.getItem('accessToken')
         try {
-            const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${userId}`, {
+            const { data: getAccount } = await axios.get(`${BASE_URL}/api/account`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
+            const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${getAccount.id}`, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 }
@@ -53,20 +69,12 @@ const PlanPortal = (props) => {
         }
     }
 
-    const getUserId = async () => {
-        const accessToken = await AsyncStorage.getItem('accessToken')
-        try {
-            const { data: getUserData } = await axios.get(`${BASE_URL}/api/account`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
-            return getUserData.id
-        }
-        catch (error){
-            console.error("Error getting user data:", error)
-        }
-    }
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+          getAllPlanInstance();
+        });
+        return unsubscribe;
+      }, [navigation]);
 
     return (
         <View style={[styles.container, { backgroundColor: selectedColor }]}>
@@ -78,10 +86,11 @@ const PlanPortal = (props) => {
                 name={'PlanPortal'}
             />
             
-            <ScrollView style={styles.bodyContainer} nestedScrollEnabled={true}>
+            <ScrollView style={styles.bodyContainer}>
                 <TopPlan
                     title='Top plan'
                     data={planData}
+                    bgData={bgImage}
                     numberPlansOfSlide={5}
                     navigation={navigation}
                 />
@@ -108,6 +117,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderWidth: 1,
         borderColor: 'white',
+        marginBottom: 30,
     },
     footer: {
         position: "absolute",
