@@ -14,6 +14,14 @@ const ProgressOnline = (props) => {
     const percentage = Math.abs(((props.goal - Math.abs(props.goal - Current)) / props.goal) * 100);
 
 
+    const today = new Date();
+    const selectedDate = new Date(props.selectedDate);
+
+    const isToday =
+        today.getFullYear() === selectedDate.getFullYear() &&
+        today.getMonth() === selectedDate.getMonth() &&
+        today.getDate() === selectedDate.getDate();
+
     useEffect(() => {
         if (Current !== props.init) {
             setCurrent(props.init);
@@ -96,8 +104,15 @@ const ProgressOnline = (props) => {
                 <Text style={styles.Text}>{props.type}</Text>
             </View>
 
-            <TouchableOpacity style={styles.currentContainer} onPress={() => setModalVisible(true)}>
-                <Text style={styles.TextCur}>{Current}{props.unit}</Text>
+            <TouchableOpacity
+                style={[styles.currentContainer, !isToday && styles.disabledContainer]}
+                onPress={() => isToday && setModalVisible(true)} 
+                disabled={!isToday} 
+            >
+                <Text style={[styles.TextCur, !isToday && styles.disabledText]}>
+                    {Current}
+                    {props.unit}
+                </Text>
             </TouchableOpacity>
 
             <View style={styles.progressContainer}>               
@@ -280,6 +295,9 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
+    // disabledContainer: {
+    //     backgroundColor: 'gray',
+    // },
 });
 
 export default ProgressOnline;

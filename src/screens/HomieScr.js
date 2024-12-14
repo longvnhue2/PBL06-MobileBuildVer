@@ -43,54 +43,7 @@ const HomieScr = ({ navigation }) => {
     ];
 
     // GET DATA USER_ATTRIBUTE
-    const GetData = async () => {
-        const token = await AsyncStorage.getItem('accessToken');
-        const URL_get_uid = `${BASE_URL}/api/account`;
-        const response = await axios.get(URL_get_uid, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        const UserID = response.data.id;
-
-        const User_Attri_URL = `${BASE_URL}/api/user-attributes?userId.equals=${UserID}&page=0&size=20`;
-        const Attri_response = await axios.get(User_Attri_URL, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        const DataResponse = Attri_response.data;
-
-        DataResponse.forEach(item => {
-            const attributeName = item.attribute.name;
-            const measureValue = item.measure;
-
-            switch (attributeName) {
-                case 'forearms':
-                    setForearms(measureValue);
-                    break;
-                case 'shoulder':
-                    setShoulder(measureValue);
-                    break;
-                case 'chest':
-                    setChest(measureValue);
-                    break;
-                case 'waist':
-                    setWaist(measureValue);
-                    break;
-                case 'height':
-                    setHeight(measureValue);
-                    break;
-                case 'weight':
-                    setWeight(measureValue);
-                    break;
-                default:
-                    break;
-            }
-        });
-    };
-
-
+    
     useEffect(() => {
         const checkAuth = async () => {
             const token = await AsyncStorage.getItem('accessToken');
@@ -104,9 +57,134 @@ const HomieScr = ({ navigation }) => {
             setLoading(false);
         };
 
+
+        const GetData = async () => {
+            const token = await AsyncStorage.getItem('accessToken');
+            const URL_get_uid = `${BASE_URL}/api/account`;
+            const response = await axios.get(URL_get_uid, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const UserID = response.data.id;
+            const historyAttributeUserResponse = await axios.get(`${BASE_URL}/api/user-attribute-history/all?userId.equals=${UserID}`, {
+                headers:{
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const dataGETHistory = historyAttributeUserResponse.data.map((data) => ({
+                historyId: data.id,
+                attributeName: data.name,
+                unit: data.unit,
+                date: data.date,
+                measure: data.measure
+            }));
+            const HistoryAttribute = dataGETHistory.filter((item) => {
+                const itemDate = new Date(item.date).toISOString().split('T')[0]; 
+                const selectedDate2 = new Date(selectedDate).toISOString().split('T')[0];
+                return itemDate === selectedDate2;
+            });
+            const datahistory = HistoryAttribute || [];
+            const User_Attri_URL = `${BASE_URL}/api/user-attributes?userId.equals=${UserID}&page=0&size=20`;
+            const Attri_response = await axios.get(User_Attri_URL, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const DataResponse = Attri_response.data;
+
+            const today = new Date();
+            //const selectedDate = new Date(selectedDate || today);
+
+            const isToday =
+                today.getFullYear() === selectedDate.getFullYear() &&
+                today.getMonth() === selectedDate.getMonth() &&
+                today.getDate() === selectedDate.getDate();
+            //console.log(`Today ?? ${isToday}`);
+            
+            // DataResponse.forEach(item => {
+            //     const attributeName = item.attribute.name;
+            //     const measureValue = item.measure;
+    
+            //     switch (attributeName) {
+            //         case 'forearms':
+            //             setForearms(measureValue);
+            //             break;
+            //         case 'shoulders':
+            //             setShoulder(measureValue);
+            //             break;
+            //         case 'chest':
+            //             setChest(measureValue);
+            //             break;
+            //         case 'waist':
+            //             setWaist(measureValue);
+            //             break;
+            //         case 'height':
+            //             setHeight(measureValue);
+            //             break;
+            //         case 'weight':
+            //             setWeight(measureValue);
+            //             break;
+            //         default:
+            //             break;
+            //     }
+            // });
+            DataResponse.forEach(item => {
+                const attributeName = item.attribute.name;
+                const measureValue = item.measure || 'N/A';
+                //console.log(measureValue);
+                const historyItem = datahistory.find(history => history.attributeName.toLowerCase() === attributeName.toLowerCase());
+                //console.log(attributeName);
+                if (historyItem && !isToday) {
+                    const mes = historyItem.measure || 'N/A';
+                    switch (attributeName.toLowerCase()) {
+                        case 'weight':
+                            setWeight(mes);
+                            break;
+                        case 'height':
+                            setHeight(mes);
+                            break;
+                        case 'waist':
+                            setWaist(mes);
+                            break;
+                        case 'shoulders':
+                            setShoulder(mes);
+                            break;
+                        case 'forearms':
+                            setForearms(mes);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+    
+                else if (isToday) {
+                    switch (attributeName.toLowerCase()) {
+                        case 'weight':
+                            setWeight(measureValue);
+                            break;
+                        case 'height':
+                            setHeight(measureValue);
+                            break;
+                        case 'waist':
+                            setWaist(measureValue)
+                            break;
+                        case 'shoulders':
+                            setShoulder(measureValue);
+                            break;
+                        case 'forearms':
+                            setForearms(measureValue);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        };
+
         GetData();
         checkAuth();
-    }, [navigation]);
+    }, [navigation, selectedDate]);
 
     const formatDate = (date) => {
         const day = date.getDate();
@@ -124,9 +202,11 @@ const HomieScr = ({ navigation }) => {
             setShowPicker(false);
         }
         if (date) {
-            const isoDate = new Date(`${date}T00:00:00Z`).toISOString();
-            console.log(isoDate);
+            //const isoDate = new Date(`${date}T00:00:00Z`).toISOString();
+            //console.log(isoDate);
             setSelectedDate(date);
+            console.log(date);
+
         }
     };
 
@@ -252,7 +332,7 @@ const styles = StyleSheet.create({
     },
     title2Container: {
         height: 50,
-        marginTop: "2%",
+        marginTop: "0%",
         marginLeft: "2%",
         flexDirection: 'row',
         justifyContent: 'space-between',

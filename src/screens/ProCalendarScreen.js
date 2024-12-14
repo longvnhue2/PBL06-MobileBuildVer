@@ -67,7 +67,8 @@ const ProgressCalendar = ({ navigation, route }) => {
             return itemDate === selectedDate;
         });
         //console.log(HistoryAttribute);
-        navigation.navigate('Progress', { HistoryAttribute });
+        const selectedDate2 = new Date(isoDate).toISOString().split('T')[0];
+        navigation.navigate('Progress', { HistoryAttribute, selectedDate : selectedDate2 });
         setSelectedDate(isoDate);
     };
 

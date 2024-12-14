@@ -34,6 +34,7 @@ const ProgressScreen = ({navigation, route}) => {
 
 
     const GetData = async () => {
+        
         const datahistory = route.params?.HistoryAttribute || [];
         const token = await AsyncStorage.getItem('accessToken');
         const URL_get_uid = `${BASE_URL}/api/account`;
@@ -51,12 +52,22 @@ const ProgressScreen = ({navigation, route}) => {
             }
         });
         const DataResponse = Attri_response.data;
+        const today = new Date();
+        const selectedDate = new Date(route.params?.selectedDate || today);
+
+        const isToday =
+            today.getFullYear() === selectedDate.getFullYear() &&
+            today.getMonth() === selectedDate.getMonth() &&
+            today.getDate() === selectedDate.getDate();
+        //console.log(`is today? ${isToday}`)
         DataResponse.forEach(item => {
             const attributeName = item.attribute.name;
             const measureValue = item.measure || 'N/A';
             const goalValue = item.measureGoal || 'N/A';
+            //console.log(measureValue);
             const historyItem = datahistory.find(history => history.attributeName.toLowerCase() === attributeName.toLowerCase());
-            if (historyItem) {
+            //console.log(attributeName);
+            if (historyItem && !isToday) {
                 const mes = historyItem.measure || 'N/A';
                 switch (attributeName.toLowerCase()) {
                     case 'weight':
@@ -79,7 +90,7 @@ const ProgressScreen = ({navigation, route}) => {
                 }
             }
 
-            else {
+            else if (isToday) {
                 switch (attributeName.toLowerCase()) {
                     case 'weight':
                         setCurrentWeight(measureValue);
@@ -105,7 +116,7 @@ const ProgressScreen = ({navigation, route}) => {
                 case 'forearms':
                     setgoalForearms(goalValue);
                     break;
-                case 'shoulder':
+                case 'shoulders':
                     setgoalShoulders(goalValue);
                     break;
                 case 'waist':
@@ -165,6 +176,7 @@ const ProgressScreen = ({navigation, route}) => {
 
 
         <ScrollView>
+            <Text style={{alignSelf: 'center', marginBottom:10, color:'#fff', fontSize: 30, fontStyle: 'italic', fontWeight: '700', fontFamily:'DancingScript-Bold'}}>Data in: {route.params.selectedDate}</Text>
             <View style={styles.titleContainer}>
                 <Text style={styles.c1Text}></Text>
                 <Text style={styles.c2Text}>Current</Text>
@@ -181,6 +193,7 @@ const ProgressScreen = ({navigation, route}) => {
                     goal={goalWeight} 
                     iconName="weight"
                     unit="KG"
+                    selectedDate={route.params.selectedDate}
                 />
 
                 <ProgressOnline 
@@ -191,6 +204,7 @@ const ProgressScreen = ({navigation, route}) => {
                     goal={goalHeight} 
                     iconName="human-male-height"
                     unit="CM"
+                    selectedDate={route.params.selectedDate}
                 />
 
                 <ProgressOnline 
@@ -201,6 +215,7 @@ const ProgressScreen = ({navigation, route}) => {
                     goal={goalWaist} 
                     iconName="drafting-compass"
                     unit="CM"
+                    selectedDate={route.params.selectedDate}
                 />
 
                 <ProgressOnline 
@@ -211,6 +226,7 @@ const ProgressScreen = ({navigation, route}) => {
                     goal={goalShoulders} 
                     iconName="user-injured"
                     unit="CM"
+                    selectedDate={route.params.selectedDate}
                 />
 
                 <ProgressOnline 
@@ -221,6 +237,7 @@ const ProgressScreen = ({navigation, route}) => {
                     goal={goalForearms} 
                     iconName="arm-flex"
                     unit="CM"
+                    selectedDate={route.params.selectedDate}
                 />  
             </View>
 
