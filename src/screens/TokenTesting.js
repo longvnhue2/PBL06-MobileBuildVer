@@ -35,8 +35,6 @@ const TokenScreen = () => {
         alert("Failed to get push token!");
         return;
       }
-
-      // Lấy Expo Push Token
       const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
       const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
       const token2 = (await Notifications.getDevicePushTokenAsync()).data;
@@ -72,14 +70,15 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: "bold",
+    fontFamily: 'RobotoMono-Bold',
     marginBottom: 20,
   },
   token: {
-    fontSize: 14,
-    color: "gray",
+    fontSize: 18,
     textAlign: "center",
+    fontFamily: 'RobotoMono-Bold',
     marginTop: 10,
   },
 });

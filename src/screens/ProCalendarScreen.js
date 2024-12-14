@@ -7,17 +7,68 @@ import Footer1 from "../components/Footer1";
 import ProgressTabs from '../components/ProgressTabs';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColor } from '../context/ColorContext';
+import BASE_URL from '../../IPHelper';
+import axios from 'axios';
 
-const ProgressCalendar = ({ navigation }) => {
+const ProgressCalendar = ({ navigation, route }) => {
     const {selectedColor} = useColor()
     const [selectedDate, setSelectedDate] = useState('');
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true); 
+    const [historyData, setHistoryData] = useState([]);
+
+    useEffect(() => {
+        const init = async() => {
+            try{
+                const token = await AsyncStorage.getItem('accessToken');
+                if (token){
+                    setUsername(await AsyncStorage.getItem('username') || '');
+                    const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    const userId = accountResponse.data.id;
+
+                    const historyAttributeUserResponse = await axios.get(`${BASE_URL}/api/user-attribute-history/all?userId.equals=${userId}`, {
+                        headers:{
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+                    const dataGET = historyAttributeUserResponse.data.map((data) => ({
+                        historyId: data.id,
+                        attributeName: data.name,
+                        unit: data.unit,
+                        date: data.date,
+                        measure: data.measure
+                    }));
+                    setHistoryData(dataGET);
+                    //console.log(dataGET.length);
+                }
+            }
+            catch(error){
+                console.log(error);
+            }
+        }
+        init();
+    }, [navigation])
 
     const onDayPress = (day) => {
-        setSelectedDate(day.dateString);
-        navigation.navigate('Progress');
+        if (!day?.dateString) {
+            console.error("Invalid day object:", day);
+            return;
+        }
+        const isoDate = new Date(`${day.dateString}T00:00:00Z`).toISOString();
+        console.log("date:", isoDate);
+        const HistoryAttribute = historyData.filter((item) => {
+            const itemDate = new Date(item.date).toISOString().split('T')[0]; 
+            const selectedDate = new Date(isoDate).toISOString().split('T')[0];
+            return itemDate === selectedDate;
+        });
+        //console.log(HistoryAttribute);
+        navigation.navigate('Progress', { HistoryAttribute });
+        setSelectedDate(isoDate);
     };
 
 

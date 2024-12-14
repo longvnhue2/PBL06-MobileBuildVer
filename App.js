@@ -1,8 +1,10 @@
 import registerNNPushToken from "native-notify";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 
 // Screens
 import HomeScreen from "./src/screens/HomeScreen";
@@ -32,11 +34,81 @@ import CustomPlanEditingScreen from "./src/screens/CustomPlanEditingScreen";
 import { ColorProvider } from "./src/context/ColorContext";
 import PlanPortal from "./src/screens/PlanPortal";
 import InsightScreen from "./src/screens/InsightScreen";
-
+import * as Font from 'expo-font';
+import AppLoading from 'expo-app-loading';
 const Stack = createStackNavigator();
 
+
+
+const fetchFonts = () => {
+  return Font.loadAsync({
+    'RobotoMono-Bold': require('./assets/font/RobotoMono-Bold.ttf'),
+    'DancingScript-Bold': require('./assets/font/DancingScript-Bold.ttf'),
+  });
+};
+
+
+
 export default function App() {
-  registerNNPushToken(25168, 'H1LtryGkC8bF1EsGqmLAfK');
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  if (!fontsLoaded) {
+    return (
+      <AppLoading
+        startAsync={fetchFonts}
+        onFinish={() => setFontsLoaded(true)}
+        onError={(err) => console.log(err)}
+      />
+    );
+  }
+  // const [expoPushToken, setExpoPushToken] = useState("");
+  // const [devicePushToken, setDevicePushToken] = useState("");
+  //registerNNPushToken(25168, 'H1LtryGkC8bF1EsGqmLAfK');
+
+  // useEffect(() => {
+  //   const notificationListener = Notifications.addNotificationReceivedListener(notification => {
+  //     console.log("Notification received:", notification);
+  //   });
+
+  //   const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
+  //     console.log("Notification clicked:", response);
+  //   });
+
+  //   return () => {
+  //     Notifications.removeNotificationSubscription(notificationListener);
+  //     Notifications.removeNotificationSubscription(responseListener);
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   const registerForPushNotifications = async () => {
+  //     const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
+
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
+
+  //     if (finalStatus !== "granted") {
+  //       alert("Failed to get push token!");
+  //       return;
+  //     }
+  //     const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
+  //     const expoToken = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+  //     const deviceToken = (await Notifications.getDevicePushTokenAsync()).data;
+
+  //     setExpoPushToken(expoToken);
+  //     setDevicePushToken(deviceToken);
+
+  //     console.log("Expo Push Token:", expoToken);
+  //     console.log("Device Push Token:", deviceToken);
+  //     await AsyncStorage.setItem("expoPushToken", expoToken);
+  //     await AsyncStorage.setItem("devicePushToken", deviceToken);
+  //   };
+
+  //   registerForPushNotifications();
+  // }, []);
 
   return (
     <ColorProvider>

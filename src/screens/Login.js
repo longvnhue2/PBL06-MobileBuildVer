@@ -184,6 +184,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     color: 'white',
     textAlign: 'center',
+    fontFamily:'DancingScript-Bold',
     fontWeight: 'bold',
     marginBottom: 30,
   },

@@ -27,6 +27,25 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1077401381119:android:8af1ba88b2c76c7e30c4ca",
+        "android_client_info": {
+          "package_name": "com.company.NvhApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoUlzuzcVyQ8DpSNCWEqpaCsoq7YoIXh4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1077401381119:android:2c969683ea70846c30c4ca",
         "android_client_info": {
           "package_name": "com.myapp"

@@ -1,105 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Alert, Platform } from 'react-native';
-// import messaging from '@react-native-firebase/messaging';
-// import notifee, { AndroidImportance } from '@notifee/react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
+//import messaging from '@react-native-firebase/messaging';
 
 const FirebaseMessaging = () => {
   const [deviceToken, setDeviceToken] = useState(null);
 
-  useEffect(() => {
-    const requestPermissionsAndGetToken = async () => {
-      try {
-        // Yêu cầu quyền trên iOS
-        if (Platform.OS === 'ios') {
-          await messaging().requestPermission();
-        }
+  // useEffect(() => {
+  //   const getFCMToken = async () => {
+  //     try {
+  //       const token = await messaging().getToken();
+  //       console.log('FCM Token:', token);
+  //       setDeviceToken(token);
+  //     } catch (error) {
+  //       console.error('Error fetching FCM registration token:', error);
+  //       Alert.alert('Error', 'Failed to fetch FCM registration token.');
+  //     }
+  //   };
 
-        // Lấy device token
-        const token = await messaging().getToken();
-        console.log('Device Token:', token);
-        setDeviceToken(token);
-      } catch (error) {
-        console.error('Error getting device token:', error);
-      }
-    };
-
-    const handleForegroundNotification = async (remoteMessage) => {
-      console.log('Notification received in foreground:', remoteMessage);
-
-      // Hiện thông báo tùy chỉnh sử dụng notifee
-      await notifee.displayNotification({
-        title: remoteMessage.notification?.title || 'Notification',
-        body: remoteMessage.notification?.body || 'You have a new message',
-        android: {
-          channelId: 'default', // Đảm bảo channelId tồn tại
-          importance: AndroidImportance.HIGH,
-        },
-      });
-    };
-
-    const setupNotificationListeners = () => {
-      // Lắng nghe thông báo khi ứng dụng đang chạy ở foreground
-      const unsubscribeForeground = messaging().onMessage(handleForegroundNotification);
-
-      // Xử lý khi thông báo được bấm
-      const unsubscribeNotificationOpened = messaging().onNotificationOpenedApp(remoteMessage => {
-        console.log('Notification caused app to open from background state:', remoteMessage);
-        Alert.alert(
-          'Notification Clicked',
-          remoteMessage.notification?.title || 'No Title',
-        );
-      });
-
-      // Xử lý khi ứng dụng được mở do nhấn vào thông báo khi đã bị kill
-      messaging()
-        .getInitialNotification()
-        .then(remoteMessage => {
-          if (remoteMessage) {
-            console.log('Notification caused app to open from quit state:', remoteMessage);
-            Alert.alert(
-              'Notification Clicked',
-              remoteMessage.notification?.title || 'No Title',
-            );
-          }
-        });
-
-      return () => {
-        unsubscribeForeground();
-        unsubscribeNotificationOpened();
-      };
-    };
-
-    // Khởi tạo
-    requestPermissionsAndGetToken();
-    const unsubscribeListeners = setupNotificationListeners();
-
-    // Cleanup khi component unmount
-    return () => unsubscribeListeners();
-  }, []);
-
-  // Tạo channel cho Android (bắt buộc nếu dùng notifee)
-  useEffect(() => {
-    const createChannel = async () => {
-      await notifee.createChannel({
-        id: 'default',
-        name: 'Default Channel',
-        importance: AndroidImportance.HIGH,
-      });
-    };
-
-    createChannel();
-  }, []);
+  //   getFCMToken();
+  // }, []);
 
   return (
-    <View>
-      <Text>Firebase Messaging</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>FCM Registration Token:</Text>
       {deviceToken ? (
-        <Text>Device Token: {deviceToken}</Text>
+        <Text style={styles.token}>{deviceToken}</Text>
       ) : (
-        <Text>Fetching Device Token...</Text>
+        <Text>Fetching FCM token...</Text>
       )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  token: {
+    fontSize: 18,
+    textAlign: "center",
+    fontFamily: 'RobotoMono-Bold',
+    marginTop: 10,
+  },
+});
 
 export default FirebaseMessaging;

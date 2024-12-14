@@ -124,6 +124,8 @@ const HomieScr = ({ navigation }) => {
             setShowPicker(false);
         }
         if (date) {
+            const isoDate = new Date(`${date}T00:00:00Z`).toISOString();
+            console.log(isoDate);
             setSelectedDate(date);
         }
     };

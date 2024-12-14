@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     title1: {
         fontSize: 35,
         fontWeight: '700',
+        fontFamily: 'DancingScript-Bold',
     },
     headers: {
         height: 70,

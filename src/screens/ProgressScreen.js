@@ -12,7 +12,7 @@ import BASE_URL from "../../IPHelper";
 import { Header } from "react-navigation-stack";
 import { useColor } from "../context/ColorContext";
 
-const ProgressScreen = ({navigation}) => {
+const ProgressScreen = ({navigation, route}) => {
     const {selectedColor} = useColor()
     const [currentWeight, setCurrentWeight] = useState('N/A');
     const [currentForearms, setCurrentForearms] = useState('N/A');
@@ -34,6 +34,7 @@ const ProgressScreen = ({navigation}) => {
 
 
     const GetData = async () => {
+        const datahistory = route.params?.HistoryAttribute || [];
         const token = await AsyncStorage.getItem('accessToken');
         const URL_get_uid = `${BASE_URL}/api/account`;
         const response = await axios.get(URL_get_uid, {
@@ -54,31 +55,74 @@ const ProgressScreen = ({navigation}) => {
             const attributeName = item.attribute.name;
             const measureValue = item.measure || 'N/A';
             const goalValue = item.measureGoal || 'N/A';
+            const historyItem = datahistory.find(history => history.attributeName.toLowerCase() === attributeName.toLowerCase());
+            if (historyItem) {
+                const mes = historyItem.measure || 'N/A';
+                switch (attributeName.toLowerCase()) {
+                    case 'weight':
+                        setCurrentWeight(mes);
+                        break;
+                    case 'height':
+                        setCurrentHeight(mes);
+                        break;
+                    case 'waist':
+                        setCurrentWaist(mes);
+                        break;
+                    case 'shoulders':
+                        setCurrentShoulders(mes);
+                        break;
+                    case 'forearms':
+                        setCurrentForearms(mes);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            else {
+                switch (attributeName.toLowerCase()) {
+                    case 'weight':
+                        setCurrentWeight(measureValue);
+                        break;
+                    case 'height':
+                        setCurrentHeight(measureValue);
+                        break;
+                    case 'waist':
+                        setCurrentWaist(measureValue)
+                        break;
+                    case 'shoulders':
+                        setCurrentShoulders(measureValue);
+                        break;
+                    case 'forearms':
+                        setCurrentForearms(measureValue);
+                        break;
+                    default:
+                        break;
+                }
+            }
         
             switch (attributeName) {
                 case 'forearms':
-                    setCurrentForearms(measureValue);
                     setgoalForearms(goalValue);
                     break;
                 case 'shoulder':
-                    setCurrentShoulders(measureValue);
                     setgoalShoulders(goalValue);
                     break;
                 case 'waist':
-                    setCurrentWaist(measureValue);
                     setgoalWaist(goalValue);
                     break;
                 case 'height':
-                    setCurrentHeight(measureValue);
+                    //setCurrentHeight(measureValue);
                     setgoalHeight(goalValue);
                     break;
                 case 'weight':
-                    setCurrentWeight(measureValue);
+                    // setCurrentWeight(measureValue);
                     setgoalWeight(goalValue);
                     break;
                 default:
                     break;
             }
+
         });        
     };
 
