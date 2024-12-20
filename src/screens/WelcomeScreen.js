@@ -455,7 +455,7 @@ const WelcomeScreen =  ({ navigation }) => {
     
         const isoDateString = `${year}-${month}-${day}T00:00:00Z`;
     
-        setDate(currentDate);
+        setDate(selectedDate);
         setDateString(isoDateString);
     };
     

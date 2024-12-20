@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ImageBackground, Alert, ActivityIndicator, AppState } from 'react-native';
 import { AntDesign } from '@expo/vector-icons'; 
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -88,6 +88,26 @@ const LoginScreen = (props) => {
     await handleLogin(values);
     setLoading(false);
   };
+
+
+  // useEffect(() => {
+  //   const handleAppStateChange = async (nextAppState) => {
+  //       await AsyncStorage.setItem('state', 'false'); 
+  //       if (nextAppState !== 'active') {
+  //           try {
+  //               await AsyncStorage.clear();  
+  //               console.log('AsyncStorage cleared on app exit');
+  //           } catch (error) {
+  //               console.error('Error clearing AsyncStorage:', error);
+  //           }
+  //       }
+  //   };
+
+  //   const subscription = AppState.addEventListener('change', handleAppStateChange);
+  //   return () => {
+  //       subscription.remove();
+  //   };
+  // }, []);
 
   return (
     <ImageBackground

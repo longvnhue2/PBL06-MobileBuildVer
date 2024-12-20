@@ -286,7 +286,7 @@ const RecustomizePlanScreen = ({navigation, route}) => {
             </View>
             <View style={{flexDirection:'column',  justifyContent: 'space-between', marginBottom:30}}>
             
-            <TouchableOpacity style={[styles.actionButton, {alignSelf:'center', height:50, marginRight:15}]} onPress={() => navigation.navigate('MyPlan')}>
+            <TouchableOpacity style={[styles.actionButton, {alignSelf:'center', height:50, marginRight:15}]} onPress={() => navigation.navigate('InsightScreen')}>
                 <Text style={[styles.buttonText, {fontSize:14, fontWeight:'800'}]}>Confirm recustomize</Text>
             </TouchableOpacity>
             </View>

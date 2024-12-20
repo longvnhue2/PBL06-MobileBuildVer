@@ -15,6 +15,7 @@ const PlanContent = (props) => {
 
     const handleSign = async() => {
         const nows = new Date();
+        nows.setHours(nows.getHours() + 7);
         try{
             const token = await AsyncStorage.getItem('accessToken');
             const formAdd = {

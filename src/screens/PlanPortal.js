@@ -62,7 +62,8 @@ const PlanPortal = (props) => {
                     Authorization: `Bearer ${accessToken}`
                 }
             });
-            setPlanInstanceData(getAllPlanInstance);
+            const inProgressPlanInstances = getAllPlanInstance.filter(item => item.status === 'IN_PROGRESS');
+            setPlanInstanceData(inProgressPlanInstances);
         }
         catch (error){
             console.error("Error getting plan instance:", error)

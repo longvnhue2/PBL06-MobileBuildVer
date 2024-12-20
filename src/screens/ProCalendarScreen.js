@@ -15,8 +15,18 @@ const ProgressCalendar = ({ navigation, route }) => {
     const [selectedDate, setSelectedDate] = useState('');
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
+    const [level, setlevel] = useState('');
     const [loading, setLoading] = useState(true); 
     const [historyData, setHistoryData] = useState([]);
+    const [numberPlan, setNumberPlan] = useState(0);
+    const [planInstanceData, setPlanInstanceData] = useState([]);
+    const [markedDates, setMarkedDates] = useState({});
+
+    const listAssigned = () => {
+        navigation.navigate('ProgressList', {
+            data: planInstanceData
+        });
+    }
 
     useEffect(() => {
         const init = async() => {
@@ -30,7 +40,7 @@ const ProgressCalendar = ({ navigation, route }) => {
                         },
                     });
                     const userId = accountResponse.data.id;
-
+                    setlevel(accountResponse.data.level);
                     const historyAttributeUserResponse = await axios.get(`${BASE_URL}/api/user-attribute-history/all?userId.equals=${userId}`, {
                         headers:{
                             Authorization: `Bearer ${token}`,
@@ -44,6 +54,14 @@ const ProgressCalendar = ({ navigation, route }) => {
                         measure: data.measure
                     }));
                     setHistoryData(dataGET);
+
+                    const { data: getAllPlanInstance } = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${userId}`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    });
+                    setNumberPlan(getAllPlanInstance.length);
+                    setPlanInstanceData(getAllPlanInstance);
                     //console.log(dataGET.length);
                 }
             }
@@ -53,6 +71,46 @@ const ProgressCalendar = ({ navigation, route }) => {
         }
         init();
     }, [navigation])
+
+    useEffect(() => {
+        const updateMarkedDates = () => {
+            const marked = {};
+            const sortedData = historyData.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            sortedData.forEach((item, index) => {
+                const itemDate = new Date(item.date).toISOString().split('T')[0];
+                if (item.measure !== undefined && item.measure !== null) {
+                    if (!marked[itemDate]) {
+                        marked[itemDate] = { 
+                            marked: true, 
+                            dotColor: 'cyan', 
+                            dots: [{ key: 'hasMeasure', color: 'cyan', selectedDotColor: 'cyan', size: 10 }] 
+                        };
+                    } else {
+                        marked[itemDate].dots.push({ key: `measure-${index}`, color: 'blue', selectedDotColor: 'blue', size: 10 });
+                    }
+                } else {
+                    if (!marked[itemDate]) {
+                        marked[itemDate] = { 
+                            marked: true, 
+                            dotColor: 'orange', 
+                            dots: [{ key: 'noMeasure', color: 'orange', selectedDotColor: 'orange', size: 8 }] 
+                        };
+                    }
+                }
+            });
+    
+            setMarkedDates(marked);
+        };
+    
+        if (historyData.length > 0) {
+            updateMarkedDates();
+        }
+    }, [historyData]);
+    
+    
+    
+
 
     const onDayPress = (day) => {
         if (!day?.dateString) {
@@ -112,10 +170,7 @@ const ProgressCalendar = ({ navigation, route }) => {
             <ScrollView style={styles.body} contentContainerStyle={{ flexGrow: 1 }}>
                 <Calendar
                     onDayPress={onDayPress}
-                    markedDates={{
-                        '2024-09-12': { selected: true, marked: true, dotColor: 'blue' },
-                        '2024-09-13': { marked: true, dotColor: 'orange' },
-                    }}
+                    markedDates={markedDates} 
                     theme={{
                         calendarBackground: '#10132A',
                         textSectionTitleColor: '#fff',
@@ -136,21 +191,21 @@ const ProgressCalendar = ({ navigation, route }) => {
 
                 {/* Legend */}
                 <View style={styles.legendContainer}>
-                    <View style={styles.legendItem}>
+                    {/* <View style={styles.legendItem}>
                         <View style={[styles.dot, { backgroundColor: 'purple' }]} />
                         <Text style={styles.legendText}>Progress photo</Text>
-                    </View>
+                    </View> */}
                     <View style={styles.legendItem}>
-                        <View style={[styles.dot, { backgroundColor: 'orange' }]} />
-                        <Text style={styles.legendText}>Notes</Text>
+                        <View style={[styles.dot, { backgroundColor: 'cyan' }]} />
+                        <Text style={styles.legendText}>Has history attribute</Text>
                     </View>
-                    <View style={styles.legendItem}>
+                    {/* <View style={styles.legendItem}>
                         <View style={[styles.dot, { backgroundColor: 'red' }]} />
                         <Text style={styles.legendText}>Body logs</Text>
-                    </View>
+                    </View> */}
                 </View>
 
-                <TouchableOpacity style={styles.reportContainer}>
+                <TouchableOpacity style={styles.reportContainer} onPress={listAssigned}>
                     <Text style={styles.reportText}>Your In-Depth Workout Report</Text>
                     <Text style={styles.viewNowText}>View now →</Text>
                 </TouchableOpacity>
@@ -163,8 +218,8 @@ const ProgressCalendar = ({ navigation, route }) => {
                         <View style={styles.rankContainer}>
                             <Icon name="crown" size={18} color="orange" />
                         </View>
-                        <Text style={styles.username}>nvhhhhh</Text>
-                        <Text style={styles.streakCount}>0</Text>
+                        <Text style={styles.username}>{username} ({level})</Text>
+                        <Text style={styles.streakCount}>Total plan: {numberPlan}</Text>
                     </View>
                 </View>
             </ScrollView>

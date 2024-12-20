@@ -28,6 +28,8 @@ const HomeScreen = (props) => {
     <Button title="CustomPlanEditing" onPress={() => props.navigation.navigate('CustomPlanEditing')}/>
     <Button title="PlanPortal" onPress={() => props.navigation.navigate('PlanPortal')}/>
     <Button title="Insight" onPress={() => props.navigation.navigate('InsightScreen')}/>
+    <Button title="WorkoutPlan" onPress={() => props.navigation.navigate('WorkoutPlan')}/>
+    <Button title="ProgressList" onPress={() => props.navigation.navigate('ProgressList')}/>
   </ScrollView>
 };
 

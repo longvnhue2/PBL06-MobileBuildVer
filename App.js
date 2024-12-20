@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
+import { AppState } from 'react-native';
 
 // Screens
 import HomeScreen from "./src/screens/HomeScreen";
@@ -36,6 +37,8 @@ import PlanPortal from "./src/screens/PlanPortal";
 import InsightScreen from "./src/screens/InsightScreen";
 import * as Font from 'expo-font';
 import AppLoading from 'expo-app-loading';
+import WorkoutPlanScreen from "./src/screens/WorkoutPlanScreen";
+import ProgessListScreen from "./src/screens/ProgressListScreen";
 const Stack = createStackNavigator();
 
 
@@ -51,6 +54,29 @@ const fetchFonts = () => {
 
 export default function App() {
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    const initial = async () => {
+      await AsyncStorage.setItem('state', 'false'); 
+    }
+    const handleAppStateChange = async (nextAppState) => {
+        if (nextAppState !== 'active') {
+            try {
+                await AsyncStorage.clear();  
+                await AsyncStorage.setItem('state', 'false'); 
+                console.log('AsyncStorage cleared on app exit');
+            } catch (error) {
+                console.error('Error clearing AsyncStorage:', error);
+            }
+        }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    initial();
+    return () => {
+        subscription.remove();
+    };
+  }, []);
 
   if (!fontsLoaded) {
     return (
@@ -110,6 +136,8 @@ export default function App() {
   //   registerForPushNotifications();
   // }, []);
 
+  
+
   return (
     <ColorProvider>
       <NavigationContainer>
@@ -140,6 +168,8 @@ export default function App() {
           <Stack.Screen name="CustomPlanEditing" component={CustomPlanEditingScreen} />
           <Stack.Screen name="PlanPortal" component={PlanPortal} />
           <Stack.Screen name="InsightScreen" component={InsightScreen} />
+          <Stack.Screen name="WorkoutPlan" component={WorkoutPlanScreen} />
+          <Stack.Screen name="ProgressList" component={ProgessListScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </ColorProvider>

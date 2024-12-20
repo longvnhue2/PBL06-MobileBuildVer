@@ -693,12 +693,20 @@ const PlanScreen = ({ navigation, route }) => {
                         <Text style={styles.textDay}>AVG Rating: {route.params?.avgrating || 0}★</Text>
                         {/* <Text style={styles.textDay}>ABC</Text> */}
                     </View>
-                    <TouchableOpacity
+                    {isPublic &&(
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => handleCopyPlan()}
+                        >
+                            <Text style={styles.buttonText}>Get this plan</Text>
+                        </TouchableOpacity>
+                    )}
+                    {/* <TouchableOpacity
                         style={styles.button}
                         onPress={() => handleCopyPlan()}
                     >
                         <Text style={styles.buttonText}>Get this plan</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
                 <View style={{ marginBottom: '10%', flex: 1 }}>
                 {Object.keys(groupedExercises)

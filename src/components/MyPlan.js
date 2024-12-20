@@ -68,8 +68,16 @@ const MyPlan = (props) => {
         const scale = index === currentIndex ? 1.2 : 1;
         return (
             <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
-                <TouchableOpacity onPress={() => navigation.navigate('InsightScreen', { planID: item.id })}>
+                <TouchableOpacity onPress={() => {
+                    console.log(`Plan Instance ID: ${item.id}`);
+                    if (item.status === 'IN_PROGRESS') 
+                        navigation.navigate('WorkoutPlan', { planInstanceID: item.id, namePlan: item.name});
+                }}>
                     <Text style={styles.cardText}>{item.name}</Text>
+                    <Text style={styles.cardText}>
+                       Start on: {new Date(item.startDate).getDate()}/{new Date(item.startDate).getMonth() + 1}/{new Date(item.startDate).getFullYear()}
+                    </Text>
+
                     <Text>Status: {item.status === 'IN_PROGRESS' ? 'In progress' : 'completed'}</Text>
                 </TouchableOpacity>
             </Animated.View>
