@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import Header1 from '../components/Header1'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import Progresstabs from '../components/ProgressTabs'
@@ -11,6 +11,7 @@ import BASE_URL from '../../IPHelper'
 import SearchBar from '../components/SearchBar'
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
+import { useFocusEffect } from '@react-navigation/native'
 
 
 const InsightScreen = (props) => {
@@ -43,90 +44,158 @@ const InsightScreen = (props) => {
 
     
     useEffect(() => {
-    const registerForPushNotifications = async () => {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-        }
-        if (finalStatus !== "granted") {
-        alert("Failed to get push token!");
-        return;
-        }
-        const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
-        const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
-        const token2 = (await Notifications.getDevicePushTokenAsync()).data;
-        setExpoPushToken(token);
-        setDevicePushToken(token2);
-        console.log("Expo Push Token:", token);
-        console.log("Device Push Token:", token2);
-    };
+        const registerForPushNotifications = async () => {
+                const { status: existingStatus } = await Notifications.getPermissionsAsync();
+                let finalStatus = existingStatus;
+                if (existingStatus !== "granted") {
+                const { status } = await Notifications.requestPermissionsAsync();
+                finalStatus = status;
+                }
+                if (finalStatus !== "granted") {
+                alert("Failed to get push token!");
+                return;
+                }
+                const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
+                const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
+                const token2 = (await Notifications.getDevicePushTokenAsync()).data;
+                setExpoPushToken(token);
+                setDevicePushToken(token2);
+                console.log("Expo Push Token:", token);
+                console.log("Device Push Token:", token2);
+        };
 
-    registerForPushNotifications();
+        registerForPushNotifications();
     }, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const accessToken = await AsyncStorage.getItem('accessToken')
+    useFocusEffect(
+        useCallback(() => {
+            const fetchData = async () => {
+                const accessToken = await AsyncStorage.getItem('accessToken');
+    
+                try {
+                    const { data: getAccount } = await axios.get(`${BASE_URL}/api/account`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`
+                        }
+                    });
+    
+                    const { data: getPlanData } = await axios.get(`${BASE_URL}/api/plans/all?userId.equals=${getAccount.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`
+                        }
+                    });
+    
+                    const responseDate_Plan = await axios.get(`${BASE_URL}/api/date-plans/all`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    });
+    
+                    const responseExercise_Plans = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    });
+    
+                    const plansWithExerciseCount = responseDate_Plan.data.reduce((acc, datePlan) => {
+                        const matchingExercises = responseExercise_Plans.data.filter(exercisePlan => exercisePlan.datePlanId === datePlan.id);
+    
+                        if (!acc[datePlan.planId]) {
+                            acc[datePlan.planId] = 0;
+                        }
+    
+                        acc[datePlan.planId] += matchingExercises.length;
+    
+                        return acc;
+                    }, {});
+    
+                    const PlanData = getPlanData.map(data => ({
+                        id: data.id,
+                        title: data.name,
+                        subtitle1: data.status,
+                        subtitle2: `${plansWithExerciseCount[data.id] || 0} exercises`,
+                        iconName: 'linux',
+                        totalDays: data.totalDays || 0,
+                        description: data.description,
+                        status: data.status
+                    }));
+    
+                    setPlanData(PlanData);
+                    setFilterPlan(PlanData);
+                } catch (error) {
+                    console.error("Error getting plan:", error);
+                }
+            };
+            fetchData();
+            return () => {
+                setPlanData([]);
+                setFilterPlan([]);
+            };
+        }, [isRefresh]) 
+    );
 
-            try {
-                const { data: getAccount } = await axios.get(`${BASE_URL}/api/account`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                })
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         const accessToken = await AsyncStorage.getItem('accessToken')
 
-                const { data: getPlanData } = await axios.get(`${BASE_URL}/api/plans/all?userId.equals=${getAccount.id}`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    }
-                });
+    //         try {
+    //             const { data: getAccount } = await axios.get(`${BASE_URL}/api/account`, {
+    //                 headers: {
+    //                     Authorization: `Bearer ${accessToken}`
+    //                 }
+    //             })
+
+    //             const { data: getPlanData } = await axios.get(`${BASE_URL}/api/plans/all?userId.equals=${getAccount.id}`, {
+    //                 headers: {
+    //                     Authorization: `Bearer ${accessToken}`
+    //                 }
+    //             });
                 
 
-                const responseDate_Plan = await axios.get(`${BASE_URL}/api/date-plans/all`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
+    //             const responseDate_Plan = await axios.get(`${BASE_URL}/api/date-plans/all`, {
+    //                 headers: {
+    //                     Authorization: `Bearer ${accessToken}`,
+    //                 },
+    //             });
 
-                const responseExercise_Plans = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
-                headers: {
-                  Authorization: `Bearer ${accessToken}`,
-                },
-              });
+    //             const responseExercise_Plans = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
+    //             headers: {
+    //               Authorization: `Bearer ${accessToken}`,
+    //             },
+    //           });
 
-                const plansWithExerciseCount = responseDate_Plan.data.reduce((acc, datePlan) => {
-                    const matchingExercises = responseExercise_Plans.data.filter(exercisePlan => exercisePlan.datePlanId === datePlan.id);
+    //             const plansWithExerciseCount = responseDate_Plan.data.reduce((acc, datePlan) => {
+    //                 const matchingExercises = responseExercise_Plans.data.filter(exercisePlan => exercisePlan.datePlanId === datePlan.id);
 
-                    if (!acc[datePlan.planId]) {
-                    acc[datePlan.planId] = 0;
-                    }
+    //                 if (!acc[datePlan.planId]) {
+    //                 acc[datePlan.planId] = 0;
+    //                 }
 
-                    acc[datePlan.planId] += matchingExercises.length;
+    //                 acc[datePlan.planId] += matchingExercises.length;
 
-                    return acc;
-                }, {});
+    //                 return acc;
+    //             }, {});
 
-                const PlanData = getPlanData.map(data => ({
-                    id: data.id,
-                    title: data.name,
-                    subtitle1: data.status,
-                    subtitle2: `${plansWithExerciseCount[data.id] || 0} exercises`,
-                    iconName: 'linux',
-                    totalDays: data.totalDays || 0,
-                    description: data.description
-                }));
+    //             const PlanData = getPlanData.map(data => ({
+    //                 id: data.id,
+    //                 title: data.name,
+    //                 subtitle1: data.status,
+    //                 subtitle2: `${plansWithExerciseCount[data.id] || 0} exercises`,
+    //                 iconName: 'linux',
+    //                 totalDays: data.totalDays || 0,
+    //                 description: data.description,
+    //                 status: data.status
+    //             }));
 
-                setPlanData(PlanData);
-                setFilterPlan(PlanData);
-            }
-            catch (error){
-                console.error("Error getting plan:", error)
-            }
-        }
-        fetchData();
-    }, [navigation, isRefresh])
+    //             setPlanData(PlanData);
+    //             setFilterPlan(PlanData);
+    //         }
+    //         catch (error){
+    //             console.error("Error getting plan:", error)
+    //         }
+    //     }
+    //     fetchData();
+    // }, [navigation, isRefresh])
 
     const handleChangeInputSearch = (text) => {
       setPlanData(filterPlan)
@@ -175,6 +244,7 @@ const InsightScreen = (props) => {
                             totalDays={plan.totalDays}
                             description={plan.description}
                             devicePushToken={devicePushToken}
+                            status={plan.status}
                         />
                     ))}
                 </View>

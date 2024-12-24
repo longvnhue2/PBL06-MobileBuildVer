@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import axios from "axios";
 import BASE_URL from "../../IPHelper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LottieView from "lottie-react-native";
 
 
 const PlanContent = (props) => {
@@ -12,6 +13,8 @@ const PlanContent = (props) => {
     const [isModalWarningVisible, setModalWarningVisible] = useState(false);
     const [statusCode, setStatusCode] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [public2, setPublic2] = useState(false);
 
     const handleSign = async() => {
         const nows = new Date();
@@ -36,8 +39,9 @@ const PlanContent = (props) => {
             setShowMessage(true); 
                 setTimeout(() => {
                     setShowMessage(false); 
-                }, 1250);
+                }, 1500);
             if (POSTinstanceResponse.status >= 200 && POSTinstanceResponse.status <= 300){
+                //console.log(props.status);
                 props.navigation.navigate("PlanPortal");
             }
         }
@@ -66,6 +70,16 @@ const PlanContent = (props) => {
     const handleDEL = () => {
         setModalWarningVisible(true);
     }
+
+    const handlePress = () => {
+        if (props.status === 'PRIVATE') {
+            handleEDIT();
+        } else {
+            setShowModal(true); 
+            setTimeout(() => setShowModal(false), 2000); 
+        }
+    };
+
     const handleConfirmDelete = async () => {
         setModalWarningVisible(false);
         setIsVisible(!isVisible); 
@@ -96,6 +110,42 @@ const PlanContent = (props) => {
     const handleCancel = () => {
         setModalWarningVisible(false);
     };
+
+    const handlePublic = async() => {
+        try{
+            const token = await AsyncStorage.getItem('accessToken');
+            const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const userId = accountResponse.data.id;
+            const formPUT = {
+                name: props.title,
+                totalDays : props.totalDays,
+                status: 'PENDING_REVIEW',
+                userId: userId
+            }
+            const publicResponse = await axios.put(`${BASE_URL}/api/plans/${props.planID}`, formPUT, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            const statusCode = publicResponse.status;
+            if (statusCode >= 200 && statusCode <= 300) {
+                setPublic2(true);
+                console.log(`PUBLIC: ${statusCode}`);
+                setTimeout(() => {
+                    props.navigation.replace('InsightScreen');
+                    setPublic2(false);
+                }, 3000);
+            }
+        }
+        catch(e){
+            console.error(e);
+        }
+    }
+
     return (<LinearGradient 
         colors={['#00687c', '#022b33']}
         start={{ x: 0, y: 0 }}
@@ -103,12 +153,16 @@ const PlanContent = (props) => {
         style={styles.blockContent}
     ><View style={styles.cardContainer}>
         <View style={styles.leftSection}>
-        <Icon name={props.iconName} size={70} color="rgba(20, 240, 171, 1)" />
+        <Icon
+            name={props.iconName}
+            size={70}
+            color={props.status === 'PRIVATE' ? 'rgba(20, 240, 171, 1)' : 'rgb(71, 41, 67)'}
+        />
 
         <View style={styles.textContainer}>
                     <Text style={styles.titleText}>{props.title}</Text>
                     <Text style={styles.subtitleText}>Length: {props.totalDays} day(s)</Text>
-                    <Text style={styles.subtitleText}>{props.subtitle2}</Text>
+                    <Text style={styles.subtitleText}>{props.subtitle2}, {props.status}</Text>
                     {/* <Text style={styles.subtitleText}>AVG Rate: {props.avgrating} ☆</Text> */}
         </View>
         </View>
@@ -150,9 +204,17 @@ const PlanContent = (props) => {
                     >
                         <Text style={styles.comboText2}>Start plan!</Text>
                     </TouchableOpacity>
+                    {props.status === 'PRIVATE' && (
+                        <TouchableOpacity
+                            style={styles.comboItem2}
+                            onPress={handlePublic}
+                        >
+                            <Text style={styles.comboText}>Public this plan</Text>
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity
-                        style={styles.comboItem2}
-                        onPress={() => handleEDIT()}
+                        style={styles.comboItem2nd}
+                        onPress={handlePress}
                     >
                         <Text style={styles.comboText}>Recustomize plan</Text>
                     </TouchableOpacity>
@@ -192,6 +254,44 @@ const PlanContent = (props) => {
                                 <Text style={styles.confirmButtonText}>Confirm</Text>
                             </TouchableOpacity>
                         </View>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={showModal}
+                onRequestClose={() => setShowModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <LottieView
+                            source={require('../../assets/403.json')} 
+                            autoPlay
+                            loop={false}
+                            style={styles.lottie}
+                        />
+                        <Text style={styles.modalText}>Only private plans can be recustomized!</Text>
+                    </View>
+                </View>
+            </Modal>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={public2}
+                onRequestClose={() => setPublic2(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <LottieView
+                            source={require('../../assets/completed.json')} 
+                            autoPlay
+                            loop={false}
+                            style={styles.lottie}
+                        />
+                        <Text style={styles.modalText}>Success public! This plan is pending to be approved!</Text>
                     </View>
                 </View>
             </Modal>
@@ -266,9 +366,18 @@ const styles = StyleSheet.create({
       comboItem2: {
           padding: 10,
           borderBottomWidth: 1,
+          
           borderBottomColor: '#ddd',
           backgroundColor:'rgb(36, 105, 68)',
       },
+      comboItem2nd: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderTopWidth: 2,
+        borderTopColor: '#fff',
+        borderBottomColor: '#ddd',
+        backgroundColor:'rgb(36, 105, 68)',
+    },
       comboItem3: {
         padding: 10,
         borderBottomWidth: 1,
@@ -297,6 +406,7 @@ const styles = StyleSheet.create({
     },
     modalContainer: {
         width: 300,
+        height: 300,
         backgroundColor: "rgb(34,90,52)",
         borderRadius: 8,
         padding: 20,
@@ -341,6 +451,24 @@ const styles = StyleSheet.create({
     confirmButtonText: {
         color: "white",
         fontWeight: "800",
+    },
+    lottie: {
+        width: 200,
+        height: 200,
+    },
+    modalContent: {
+        width: '80%',
+        backgroundColor: 'rgb(0, 92, 69)',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalText: {
+        fontSize: 20,
+        color: 'white',
+        marginBottom: 20,
+        textAlign: 'center',
+        fontWeight: '500',
     },
 });
 

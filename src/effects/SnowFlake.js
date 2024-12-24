@@ -29,7 +29,7 @@ const SnowFallEffect = ({ from, to }) => {
             Animated.loop(
                 Animated.sequence([
                     Animated.timing(animatedValue, {
-                        toValue: -265, 
+                        toValue: -335, 
                         duration: speed,
                         delay: delay,
                         useNativeDriver: true,

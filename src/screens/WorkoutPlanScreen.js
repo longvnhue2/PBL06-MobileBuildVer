@@ -10,6 +10,7 @@ import BASE_URL from "../../IPHelper";
 import { useColor } from "../context/ColorContext";
 import { LinearGradient } from "expo-linear-gradient";
 import ExerciseContentNotDetailForInstance from "../components/ExerciseContentNotDetailInstance";
+import LottieView from "lottie-react-native";
 
 
 const WorkoutPlanScreen = ({ navigation, route }) => {
@@ -23,6 +24,9 @@ const WorkoutPlanScreen = ({ navigation, route }) => {
     const [currentDatePlanInstanceID, setCurrentDatePlanInstanceID] = useState(0);
     const [datePlanId, setDatePlanId] = useState(0);
     const setState = route.params?.setState;
+    const [cancelModal, setCancelModal] = useState(false);
+    const [modalCancelVisible, setModalCancelVisible] = useState(false);
+    
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -117,6 +121,40 @@ const WorkoutPlanScreen = ({ navigation, route }) => {
         });
     }
 
+    const cancelToggle = () => {
+        setCancelModal(!cancelModal);
+    }
+
+    const handleCancel = async () => {
+        try{
+            const token = await AsyncStorage.getItem('accessToken');
+            const accountResponse = await axios.get(`${BASE_URL}/api/account`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const userId = accountResponse.data.id;
+            const CancelResponse = await axios.get(`${BASE_URL}/api/plan-instances/cancel/${planInstanceID}`, {
+                headers:{
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const statusCode = CancelResponse.status;
+            if (statusCode >= 200 && statusCode <= 300){
+                console.log(`Cancelled: ${statusCode}`);
+                setCancelModal(false);
+                setModalCancelVisible(true);
+                setTimeout(() => {
+                    setModalCancelVisible(false);
+                    navigation.navigate('PlanPortal');
+                }, 1500);
+            }
+        }
+        catch(e){
+            console.error(e);
+        }
+    }
+
     return (
         <View style={[styles.container, {backgroundColor: selectedColor}]}>
             {/* Header */}
@@ -133,14 +171,14 @@ const WorkoutPlanScreen = ({ navigation, route }) => {
                     
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}>Plan: {route.params?.namePlan}</Text>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={styles.titleText}>200 </Text>
-                        <Icon name='star' color='white' size={35}  />
-                    </View>
-                    
+                    <Text style={[styles.titleText, {marginLeft:10, marginTop:5}]}>Day: {dateOrder}</Text>
                 </View>
                 <View style={{ flexDirection: 'row' , justifyContent:'space-between'}}>
-                <Text style={[styles.titleText, {marginLeft:10, marginTop:5}]}>Day: {dateOrder}</Text>
+                <TouchableOpacity
+                    onPress={() => cancelToggle()} 
+                    style={[styles.buttonDanger, {alignSelf:'flex-end', marginRight:20, width:'35%', marginVertical:0}]}>
+                    <Text style={{color:'#fff', fontSize:20, fontWeight:'800', textAlign:'center'}}>CANCEL PLAN</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => practice()} 
                     style={[styles.button2, {alignSelf:'flex-end', marginRight:20, width:'35%', marginVertical:0}]}>
@@ -161,7 +199,58 @@ const WorkoutPlanScreen = ({ navigation, route }) => {
                             met={item.met}
                         />
                 ))}
-                </View>
+                </View> 
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={cancelModal}
+                    onRequestClose={() => setCancelModal(false)}
+                >
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+                    <View style={{
+                        backgroundColor: 'rgb(34,50,50)',
+                        padding: 20,
+                        borderRadius: 10,
+                        width: '80%',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Text style={[styles.textDay, {textAlign:'center', fontSize:18}]}>Are you sure want to cancel this plan? All progress will be revoked!</Text>
+                        <View style={{ flexDirection: 'row' , justifyContent:'space-between', marginTop:10}}>
+                        <TouchableOpacity
+                            onPress={() => cancelToggle()} 
+                            style={[styles.button2, {alignSelf:'flex-end', marginRight:20, width:'35%', marginVertical:0}]}>
+                            <Text style={{color:'#fff', fontSize:20, fontWeight:'700', textAlign:'center'}}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => handleCancel()} 
+                            style={[styles.buttonDanger, {alignSelf:'flex-end', marginRight:20, width:'35%', marginVertical:0}]}>
+                            <Text style={{color:'#fff', fontSize:20, fontWeight:'800', textAlign:'center'}}>Confirm</Text>
+                        </TouchableOpacity>
+                        </View>
+                    </View>
+                    </View>
+                </Modal>
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={modalCancelVisible}
+                    onRequestClose={() => setModalCancelVisible(false)}
+                >
+                    <View style={styles.modalContainer5}>
+                        <View style={styles.modalContent5}>
+                            <LottieView
+                                source={require('../../assets/completed.json')} 
+                                autoPlay
+                                loop={false}
+                                style={styles.lottie}
+                            />
+                            <Text style={styles.congratulationsText}>
+                                Successfully cancelled this plan!
+                            </Text>
+                        </View>
+                    </View>
+                </Modal>
             </ScrollView>
             {/* Footer */}
             <View style={styles.footer}>
@@ -454,6 +543,43 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    buttonDanger: {
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        marginLeft:10,
+        marginVertical: 10,
+        width:150,
+        borderWidth: 2,
+        borderColor: 'white',
+        backgroundColor: 'rgb(187, 25, 25)',
+        borderRadius: 5,
+        alignSelf: 'center',
+    },
+    modalContainer5: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent5: {
+        width: '80%',
+        backgroundColor: 'rgb(0, 92, 69)',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    lottie: {
+        width: 200,
+        height: 200,
+    },
+    congratulationsText: {
+        marginTop: 20,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#fff',
+        textAlign: 'center',
+    }
 });
 
 export default WorkoutPlanScreen;

@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
     body: {
         padding: 20,
         flexGrow: 1,
+        marginBottom: '15%'
     },
     footer: {
         position: 'absolute',

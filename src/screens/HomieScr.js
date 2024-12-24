@@ -214,10 +214,10 @@ const HomieScr = ({ navigation }) => {
         return <ActivityIndicator size="large" color="#0000ff" />;
     }
     
-    const toEnd = -265;
+    const toEnd = -300;
     return (
         <View style={styles.container}>
-            <Header1 title="HomeZ" navigation={navigation} isLogin={isLogin} username={username} />
+            <Header1 title="Home" navigation={navigation} isLogin={isLogin} username={username} />
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
                 <View style={styles.body}>
                     <ImageSlide
