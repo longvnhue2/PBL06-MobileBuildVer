@@ -219,7 +219,7 @@ const HomieScr = ({ navigation }) => {
         <View style={styles.container}>
             <Header1 title="Home" navigation={navigation} isLogin={isLogin} username={username} />
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <View style={styles.body}>
+                <View style={[styles.body, {backgroundColor: selectedColor}]}>
                     <ImageSlide
                         data={imageData}
                     />
@@ -346,6 +346,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#003b3b',
         padding: 10,
+        // marginRight: 10,
         // width: '45%',
         borderRadius: 5,
         height: 55,
@@ -366,9 +367,15 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
     },
+    leftColumn: {
+        width: '25%',
+    },
     itemLeft: {
         marginBottom: 25,
         width: '100%',
+    },
+    rightColumn: {
+        width: '25%',
     },
     itemRight: {
         alignItems: 'flex-end',
@@ -384,12 +391,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     imageContainer: {
-        flex: 1,
+        // flex: 1,
+        width: '50%',
         alignItems: 'center',
     },
     image: {
         width: '100%',
-        height: '80%',
+        height: '70%',
     },
     footer: {
         position: "absolute",

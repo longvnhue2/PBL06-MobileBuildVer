@@ -312,13 +312,14 @@ const styles = StyleSheet.create({
         flex : 1,
         borderColor: '#fff',
         borderWidth : 2,
+        marginBottom: 30
     },
     cardContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         //marginVertical: 5,
-        height:100
+        height:100,
     },
     leftSection: {
         flexDirection: 'row',

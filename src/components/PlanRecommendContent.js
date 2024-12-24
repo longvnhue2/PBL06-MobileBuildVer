@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 
 const PlanRecommendContent = (props) => {
-    return <TouchableOpacity onPress={() => props.navigation.navigate('Plan', {
+    return <TouchableOpacity style={{marginBottom: 30}} onPress={() => props.navigation.navigate('Plan', {
         planID: props.id,
         totalDays: props.totalDays,
         numExercises : props.subtitle1,
