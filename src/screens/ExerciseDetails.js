@@ -178,18 +178,15 @@ const ExerciseDetails = ({navigation, route}) => {
 
             <ScrollView contentContainerStyle={styles.bodyContent}>
                 <View style={styles.titleContent}>
-                    <TouchableOpacity onPress={() => navigation.navigate(backPage)}>
                         <Text style={styles.text}>
-                        ↼ {text}:
+                         {text}:
                         </Text>
-                    </TouchableOpacity>
-
                     <TouchableOpacity onPress={toggleStar}>
                         <Icon name={isStarFilled ? 'star' : 'star-o'} size={30} color="white" />
                     </TouchableOpacity>
                 </View>
 
-                <View style={{height: videoHeight}}>
+                <View style={{height: 300}}>
                     <WebView
                         style={styles.video}
                         javaScriptEnabled={true}
@@ -210,7 +207,7 @@ const ExerciseDetails = ({navigation, route}) => {
                        {description}
                     </Text>
                 </View>
-                <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
+                {/* <View style={{width: '100%', flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View style={styles.intensityContainer}>
                         <Text style={styles.type}>{setAndRep[0].setCount >= 2 ? 'Sets:' : 'Set:'}</Text>
                         <View style={styles.border}>
@@ -230,14 +227,14 @@ const ExerciseDetails = ({navigation, route}) => {
                         </View>
                         <Text style={styles.type}>s</Text>
                     </View>
-                </View>
+                </View> */}
             </ScrollView>
 
-            <View style={{ alignItems: 'center', marginBottom: '18%', marginTop: '3%'}}>
+            {/* <View style={{ alignItems: 'center', marginBottom: '18%', marginTop: '3%'}}>
                 <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('CustomPlan')}>
                     <Text style={styles.buttonText}>Add</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
 
 
             <Modal visible={isModalVisible} transparent={true} animationType="fade">

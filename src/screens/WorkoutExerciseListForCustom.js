@@ -27,13 +27,14 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showDropdown2, setShowDropdown2] = useState(false);
     const [selectedItem, setSelectedItem] = useState('Forearm');
-    const [equipment, setEquipment] = useState(0);
+    const [equipment, setEquipment] = useState('ALL');
     const [showMore, setShowMore] = useState(false); 
 
-    const data2 = Array.from({ length: 15 }, (_, index) => index + 1);
+    const data2 = ['ALL', '0~2 met', '2~3.5 met', '3.5~6 met', '6~8.5 met', '8.5~10 met'];
 
 
     const attributeNameToIdMap = {
+        ALL:0,
         weight: 1,
         height: 2,
         waist: 3,
@@ -70,14 +71,27 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
         }
     };
 
-    const updateExerciseData = (attributeId, favor) => {
+    const updateExerciseData = (attributeId, favor, equipment) => {
         setExerciseData((prevData) =>
-            prevData.map((data) => ({
-                ...data,
-                visible:
-                    (!attributeId || data.attribute_id.includes(attributeId)) &&
-                    (!favor || data.isFavorited === 1) ? 1 : 0,
-            }))
+            prevData.map((data) => {
+                const isEquipmentMatch =
+                    equipment === 'ALL' ||
+                    (equipment === '0~2 met' && data.met >= 0 && data.met <= 2) ||
+                    (equipment === '2~3.5 met' && data.met > 2 && data.met <= 3.5) ||
+                    (equipment === '3.5~6 met' && data.met > 3.5 && data.met <= 6) ||
+                    (equipment === '6~8.5 met' && data.met > 6 && data.met <= 8.5) ||
+                    (equipment === '8.5~10 met' && data.met > 8.5 && data.met <= 10);
+    
+                return {
+                    ...data,
+                    visible:
+                        (!attributeId || data.attribute_id.includes(attributeId)) &&
+                        (!favor || data.isFavorited === 1) &&
+                        isEquipmentMatch
+                            ? 1
+                            : 0,
+                };
+            })
         );
     };
 
@@ -86,7 +100,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
             navigation.navigate('LoginScreen');
         } else {
             setFavor(!isFavor);
-            updateExerciseData(selectedAttribute, !isFavor);
+            updateExerciseData(selectedAttribute, !isFavor, equipment);
         }
     };
 
@@ -102,12 +116,15 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
         setSelectedItem(item);
         const attributeId = attributeNameToIdMap[item];
         setSelectedAttribute(attributeId);
-        updateExerciseData(attributeId, isFavor);
+        //console.log(`1selected attribute ${attributeId}, selected met ${equipment}`);
+        updateExerciseData(attributeId, isFavor, equipment);
         toggleDropdown();
     };
 
     const selectItem2 = (item) => {
         setEquipment(item);
+        //console.log(`2selected attribute ${selectedAttribute}, selected met ${item}`);
+        updateExerciseData(selectedAttribute, isFavor, item);
         toggleDropdown2();
     };
 
@@ -181,7 +198,8 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                     caloConsume: data.caloConsume,
                     visible: 1,
                     isFavorited : FavorSET.has(data.id) ? 1 : 0,
-                    setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0}
+                    setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0},
+                    met: data.met || 0
                 }));
                 //console.log(DataGET.length);
                 // const DataGETAttribute = Attribute_response.data.map((data) => ({
@@ -202,6 +220,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                 if (attributeType){
                     switch (attributeType) {
                         case 'weight':
+                            setSelectedItem('weight');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -210,6 +229,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                             );
                             break;
                         case 'height':
+                            setSelectedItem('height');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -218,6 +238,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                             );
                             break;
                         case 'waist':
+                            setSelectedItem('waist');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -226,6 +247,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                             );
                             break;
                         case 'shoulder':
+                            setSelectedItem('shoulder');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -234,6 +256,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                             );
                             break;
                         case 'forearms':
+                            setSelectedItem('forearms');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -334,13 +357,22 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                 description: data.description,
                 visible: 1,
                 isFavorited : FavorSET.has(data.id) ? 1 : 0,
-                setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0}
+                setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0},
+                met: data.met || 0
             }));
             setExerciseData(DataGET);
         }
             catch(err) {
                 console.error(err);
             }
+    }
+
+    const resetFilter = () => {
+        setSelectedItem('ALL');
+        setEquipment('ALL');
+        setSelectedAttribute(0);
+        setFavor(false);
+        updateExerciseData(0, false, 'ALL');
     }
 
     return (
@@ -374,6 +406,9 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
             <ScrollView contentContainerStyle={styles.bodyContent}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}>Exercises:</Text>
+                    <TouchableOpacity style={styles.buttonTitle} onPress={resetFilter}>
+                        <Text style={styles.buttonText}>Reset Filter</Text>
+                    </TouchableOpacity>
                 </View>
 
                 <View style={styles.filtersContainer}>
@@ -497,6 +532,7 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                                 // description={exercise.description}
                                 // isFavorited={exercise.isFavorited}
                                 back='WorkoutExerciseCustom'
+                                met={exercise.met}
                                 caloConsume={exercise.caloConsume}
                                 onFavoriteChange={handleFavoriteChange}
                                 //QuickRefreshSelected={QuickRefreshSelected}
@@ -506,10 +542,14 @@ const WorkoutExerciseListForCustom = ({ navigation, route }) => {
                         ))}
                 </View>
 
-                <TouchableOpacity style={styles.seeMoreContainer} onPress={toggleShowMore}>
-                    <Text style={styles.text}>{showMore ? 'See less' : 'See more'}</Text>
-                    <Icon name={showMore ? "arrow-up" : "arrow-down"} color={'#fff'} size={20} />
-                </TouchableOpacity>
+               
+                {exerciseData.filter((exercise) => exercise.visible === 1) 
+                        .length > 4 && (
+                    <TouchableOpacity style={styles.seeMoreContainer} onPress={toggleShowMore}>
+                        <Text style={styles.text}>{showMore ? 'See less' : 'See more'}</Text>
+                        <Icon name={showMore ? "arrow-up" : "arrow-down"} color={'#fff'} size={20} />
+                    </TouchableOpacity>
+                )}
                     
                 
                 {/* <TouchableOpacity style={[styles.button, {alignItems:'center', alignSelf:'center', marginVertical: 20}]} onPress={

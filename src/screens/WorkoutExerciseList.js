@@ -25,14 +25,16 @@ const WorkoutExerciseList = ({ navigation, route }) => {
     const [isFavor, setFavor] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const [showDropdown2, setShowDropdown2] = useState(false);
-    const [selectedItem, setSelectedItem] = useState('Forearm');
-    const [equipment, setEquipment] = useState(0);
+    const [selectedItem, setSelectedItem] = useState();
+    const [equipment, setEquipment] = useState('ALL');
     const [showMore, setShowMore] = useState(false); 
 
-    const data2 = Array.from({ length: 15 }, (_, index) => index + 1);
+    const data2 = ['ALL', '0~2 met', '2~3.5 met', '3.5~6 met', '6~8.5 met', '8.5~10 met'];
+
 
 
     const attributeNameToIdMap = {
+        ALL:0,
         weight: 1,
         height: 2,
         waist: 3,
@@ -40,43 +42,35 @@ const WorkoutExerciseList = ({ navigation, route }) => {
         forearms: 5
     };
 
-    const handleAddExercise = async () => {
-        if (!isLogin) {
-            navigation.navigate('LoginScreen');
-        } else {
-            try{
-                const token = await AsyncStorage.getItem('accessToken');
-                const roleResponse = await axios.get(`${BASE_URL}/api/account`, {
-                    headers:{
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const roleName = roleResponse.data.role.name;
-                //console.log(roleName);
-
-                if (roleName === 'USER') {
-                    setModalVisible(true);
-                }
-
-                else if (roleName === 'ADMIN'){
-                    navigation.navigate('PostExercise');
-                }
-            }
-            catch (err) {
-                console.error(err);
-            }
-            
-        }
-    };
-
-    const updateExerciseData = (attributeId, favor) => {
+    const updateExerciseData = (attributeId, favor, equipment) => {
+        // setExerciseData((prevData) =>
+        //     prevData.map((data) => ({
+        //         ...data,
+        //         visible:
+        //             (!attributeId || data.attribute_id.includes(attributeId)) &&
+        //             (!favor || data.isFavorited === 1) ? 1 : 0,
+        //     }))
+        // );
         setExerciseData((prevData) =>
-            prevData.map((data) => ({
-                ...data,
-                visible:
-                    (!attributeId || data.attribute_id.includes(attributeId)) &&
-                    (!favor || data.isFavorited === 1) ? 1 : 0,
-            }))
+            prevData.map((data) => {
+                const isEquipmentMatch =
+                    equipment === 'ALL' ||
+                    (equipment === '0~2 met' && data.met >= 0 && data.met <= 2) ||
+                    (equipment === '2~3.5 met' && data.met > 2 && data.met <= 3.5) ||
+                    (equipment === '3.5~6 met' && data.met > 3.5 && data.met <= 6) ||
+                    (equipment === '6~8.5 met' && data.met > 6 && data.met <= 8.5) ||
+                    (equipment === '8.5~10 met' && data.met > 8.5 && data.met <= 10);
+    
+                return {
+                    ...data,
+                    visible:
+                        (!attributeId || data.attribute_id.includes(attributeId)) &&
+                        (!favor || data.isFavorited === 1) &&
+                        isEquipmentMatch
+                            ? 1
+                            : 0,
+                };
+            })
         );
     };
 
@@ -91,7 +85,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
             //         visible: !isFavor ? (data.isFavorited === 1 ? 1 : 0) : 1
             //     }))
             // );
-            updateExerciseData(selectedAttribute, !isFavor);
+            updateExerciseData(selectedAttribute, !isFavor, equipment);
         }
     };
 
@@ -107,12 +101,15 @@ const WorkoutExerciseList = ({ navigation, route }) => {
         setSelectedItem(item);
         const attributeId = attributeNameToIdMap[item];
         setSelectedAttribute(attributeId);
-        updateExerciseData(attributeId, isFavor);
+        console.log(`1selected attribute ${attributeId}, selected met ${equipment}`);
+        updateExerciseData(attributeId, isFavor, equipment);
         toggleDropdown();
     };
 
     const selectItem2 = (item) => {
         setEquipment(item);
+        console.log(`2selected attribute ${selectedAttribute}, selected met ${item}`);
+        updateExerciseData(selectedAttribute, isFavor, item);
         toggleDropdown2();
     };
 
@@ -185,13 +182,9 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                     description: data.description,
                     visible: 1,
                     isFavorited : FavorSET.has(data.id) ? 1 : 0,
-                    setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0}
+                    setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0},
+                    met: data.met || 0
                 }));
-                //console.log(DataGET.length);
-                // const DataGETAttribute = Attribute_response.data.map((data) => ({
-                //     id: data.id,
-                //     name: data.name,
-                // }));
                 const DataGETAttribute = [
                     { id: 0, name: 'ALL' },  
                     ...Attribute_response.data.map((data) => ({
@@ -199,13 +192,21 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                         name: data.name,
                     }))
                 ];
-                setAttributes(DataGETAttribute);
+                setAttributes(
+                    DataGETAttribute.map((item) =>
+                        item.name === 'shoulders'
+                            ? { ...item, name: 'shoulder' }
+                            : item
+                    )
+                );
                 setExerciseData(DataGET);
 
-                const attributeType = route.param?.attribute || 'ALL';
+                const attributeType = route.params?.attribute || 'ALL';
+                console.log(attributeType);
                 if (attributeType){
                     switch (attributeType) {
                         case 'weight':
+                            setSelectedItem('weight');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -214,6 +215,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             );
                             break;
                         case 'height':
+                            setSelectedItem('height');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -222,6 +224,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             );
                             break;
                         case 'waist':
+                            setSelectedItem('waist');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -230,6 +233,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             );
                             break;
                         case 'shoulder':
+                            setSelectedItem('shoulder');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -238,6 +242,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             );
                             break;
                         case 'forearms':
+                            setSelectedItem('forearms');
                             setExerciseData((prevData) =>
                                 prevData.map((data) => ({
                                     ...data,
@@ -339,13 +344,22 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                 description: data.description,
                 visible: 1,
                 isFavorited : FavorSET.has(data.id) ? 1 : 0,
-                setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0}
+                setAndRep: exercisePlanMap[data.id] || {setCount: 0, repCount: 0},
+                met: data.met || 0
             }));
             setExerciseData(DataGET);
         }
             catch(err) {
                 console.error(err);
             }
+    }
+
+    const resetFilter = () => {
+        setSelectedItem('ALL');
+        setEquipment('ALL');
+        setSelectedAttribute(0);
+        setFavor(false);
+        updateExerciseData(0, false, 'ALL');
     }
 
     const handleChangeInputSearch = (value) => {
@@ -384,40 +398,24 @@ const WorkoutExerciseList = ({ navigation, route }) => {
             <ScrollView contentContainerStyle={styles.bodyContent}>
                 <View style={styles.titleContainer}>
                     <Text style={styles.titleText}>Exercises:</Text>
-                    <TouchableOpacity style={styles.buttonTitle} onPress={handleAddExercise}>
-                        <Text style={styles.buttonText}>+ Add Exercise</Text>
+                    <TouchableOpacity style={styles.buttonTitle} onPress={resetFilter}>
+                        <Text style={styles.buttonText}>Reset Filter</Text>
                     </TouchableOpacity>
+                    
                 </View>
 
                 <View style={styles.searchContainer}>
-                    <SearchBar
-                        placeholder="Name ..."
-                        onChange={handleChangeInputSearch}
-                    />
-                </View>
+                        <SearchBar
+                            placeholder="Name ..."
+                            onChange={handleChangeInputSearch}
+                        />
+                    </View>
 
                 <View style={styles.filtersContainer}>
                     <TouchableOpacity onPress={toggleDropdown} style={styles.button}>
-                        <Text style={styles.text}>{selectedItem}</Text>
+                        <Text style={[styles.text, {textAlign:'center'}]}>{selectedItem}</Text>
                         <Icon name={showDropdown ? 'chevron-up' : 'chevron-down'} size={20} color="white" />
                     </TouchableOpacity>
-
-                    {/* <Modal visible={showDropdown} transparent animationType="fade">
-                        <TouchableOpacity style={styles.overlay} onPress={toggleDropdown}>
-                            <View style={styles.dropdown}>
-                                <FlatList
-                                    data={attributes}
-                                    renderItem={({ item }) => (
-                                        <TouchableOpacity onPress={() => selectItem(item.name)}>
-                                            <Text style={styles.dropdownText}>{item.name}</Text>
-                                        </TouchableOpacity>
-                                    )}
-                                    keyExtractor={(item, index) => index.toString()}
-                                />
-                            </View>
-                        </TouchableOpacity>
-                    </Modal> */}
-
                     <Modal visible={showDropdown} transparent animationType="fade">
                         <TouchableOpacity style={styles.overlay} onPress={toggleDropdown}>
                             <View style={styles.dropdown}>
@@ -516,16 +514,20 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                                 videopath={exercise.videopath}
                                 description={exercise.description}
                                 isFavorited={exercise.isFavorited}
+                                met={exercise.met}
                                 back='WorkoutExerciseList'
                                 onFavoriteChange={handleFavoriteChange}
                             />
                         ))}
                 </View>
 
-                <TouchableOpacity style={styles.seeMoreContainer} onPress={toggleShowMore}>
-                    <Text style={styles.text}>{showMore ? 'See less' : 'See more'}</Text>
-                    <Icon name={showMore ? "arrow-up" : "arrow-down"} color={'#fff'} size={20} />
-                </TouchableOpacity>
+                {exerciseData.filter((exercise) => exercise.visible === 1) 
+                        .length > 4 && (
+                    <TouchableOpacity style={styles.seeMoreContainer} onPress={toggleShowMore}>
+                        <Text style={styles.text}>{showMore ? 'See less' : 'See more'}</Text>
+                        <Icon name={showMore ? "arrow-up" : "arrow-down"} color={'#fff'} size={20} />
+                    </TouchableOpacity>
+                )}
 
 
 
@@ -575,7 +577,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         justifyContent: 'center',
         alignItems: 'flex-end',
-        paddingHorizontal: '4%'
+        paddingHorizontal: '4%',
     },
     filtersContainer: {
         flexDirection: 'row',
@@ -594,30 +596,13 @@ const styles = StyleSheet.create({
         width: '30%',
         borderRadius: 5,
     },
-    text: {
+    text: { // Dark transparent background
         color: 'white',
         fontSize: 20,
     },
-    // overlay: {
-    //     flex: 1,
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    //     backgroundColor: 'rgba(0,0,0,0.5)',
-    // },
-    // dropdown: {
-    //     backgroundColor: 'white',
-    //     padding: 20,
-    //     borderRadius: 10,
-    //     width: 200,
-    // },
-    // dropdownText: {
-    //     padding: 10,
-    //     fontSize: 16,
-    //     textAlign: 'center',
-    // },
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark transparent background
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },

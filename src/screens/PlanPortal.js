@@ -185,7 +185,7 @@ const PlanPortal = (props) => {
                 </View>
                 </ImageBackground>
                 </View> */}
-                <View style={{marginBottom:350}}>
+                <View style={{marginBottom:0}}>
                 {randomPlans.map((data, index) => {
                     const randomImageDataImage = imageDataImages[Math.floor(Math.random() * imageDataImages.length)];
                     return (
@@ -237,13 +237,13 @@ const PlanPortal = (props) => {
                     );
                 })}
                 </View>
-                {/* <TopPlan
+                <TopPlan
                     title='Top plan'
                     data={planData}
                     bgData={bgImage}
                     numberPlansOfSlide={5}
                     navigation={navigation}
-                /> */}
+                />
             </ScrollView>
 
             <View style={styles.footer}>

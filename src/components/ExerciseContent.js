@@ -153,7 +153,9 @@ const ExerciseContent = (props) => {
             
             <View style={styles.textContainer}>
                 <Text style={styles.TextDesc}>{props.text}</Text>
+                <Text style={styles.TextDesc}>Met: {props.met}</Text>
                 <Text style={styles.TextDesc}>{props.propertyDetail}</Text>
+                
                 {props.dateOrder && props.time && (<Text style={styles.TextDesc}>Day {props.dateOrder}, start time {props.time}</Text>)}
             </View>
 
