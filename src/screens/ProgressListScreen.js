@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     body: {
         padding: 20,
         flexGrow: 1,
-        marginBottom: '15%'
+        marginBottom: 100
     },
     footer: {
         position: 'absolute',
@@ -112,7 +112,8 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         justifyContent: 'flex-start',
         textAlign:'right',
-        marginLeft: '95%',
+        marginLeft: '90%',
+        width:'50%',
     },
     rowContainer: {
         flexDirection: 'row',

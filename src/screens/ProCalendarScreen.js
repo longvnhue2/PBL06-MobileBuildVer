@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#6A5ACD',
         borderRadius: 10,
         padding: 15,
-        marginBottom: 100,
+        marginBottom: 160,
     },
     streakTitle: {
         color: '#fff',

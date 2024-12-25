@@ -33,22 +33,27 @@ const Footer1 = (props) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginBottom: 10, marginTop: 10 }}>
                 <TouchableOpacity onPress={() => props.navigation.navigate('HomieScr')}>
                     <Icon name="compass" size={45} color="black" />
+                    <Text style={[styles.titleText, {color:'#000', textAlign:'center', fontSize:16}]}>Home</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => props.navigation.navigate('PlanPortal')}>
                     <Icon name="home" size={45} color="black" />
+                    <Text style={[styles.titleText, {color:'#000', textAlign:'center', fontSize:16}]}>Plan</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => props.navigation.navigate('ExerciseType')}>
                     <Icon name="dumbbell" size={45} color="black" />
+                    <Text style={[styles.titleText, {color:'#000', fontSize:16}]}>Attribute</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => props.navigation.navigate('ProgressCalendar')}>
-                    <Icon name="calendar" size={45} color="black" />
+                    <Icon name="calendar" size={45} color="black" style={{marginLeft:10}}/>
+                    <Text style={[styles.titleText, {color:'#000', textAlign:'center', fontSize:16}]}>Personal</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Icon name="ellipsis-h" size={45} color="black" />
+                    <Icon name="ellipsis-h" size={45} color="black" style={{marginLeft:8}}/>
+                    <Text style={[styles.titleText, {color:'#000', textAlign:'center', fontSize:16}]}>Settings</Text>
                 </TouchableOpacity>
             </View>
 
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
         borderTopColor: 'cyan',
         borderBottomColor: 'black',
         borderBottomWidth: 1,
-        height: '30%',
+        height: '20%',
         backgroundColor : 'rgb(23, 79, 79)',
     },
     modalContainer: {

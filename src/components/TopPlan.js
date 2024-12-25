@@ -138,7 +138,8 @@ const TopPlan = (props) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 30,
+        marginTop: 30,
+        marginBottom: 300
     },
     title: {
         fontSize: 25,

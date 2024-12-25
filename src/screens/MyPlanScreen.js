@@ -194,7 +194,7 @@ const MyPlanScreen = ({navigation}) => {
                 </View> */}
 
                 <View style={styles.titleContainer2}>
-                  <Text style={styles.titleText}>Recommend</Text>
+                  <Text style={styles.titleText}>Public Plan List</Text>
                   {/* <TouchableOpacity 
                       style={styles.buttonTitle}
                   >

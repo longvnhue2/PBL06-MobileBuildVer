@@ -7,24 +7,12 @@ import axios from "axios";
 import BASE_URL from "../../IPHelper";
 
 const Header1 = ({ title, navigation, isLogin, username, name }) => {
-    const [firstPress, setFirstPress] = useState(false);
+    
+    const [firstPress, setFirstPress] = useState(true);
     const [isVisible, setIsVisible] = useState(false);
     const [planInstanceID, setPlanInstanceID] = useState(0);
     const [namePlan, setNamePlan] = useState('');
-    
 
-    // const [notifications, setNotifications] = useState([
-    //     { id: '1', iconName: 'bullseye-arrow', title: 'Plan: ABC, day: 2', description: 'You have a date plan today' },
-    //     { id: '2', iconName: 'bullseye-arrow', title: 'Squat', description: 'Your plan has been approved!' },
-    //     { id: '3', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '4', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '5', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '6', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '7', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '8', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '9', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    //     { id: '10', iconName: 'bullseye-arrow', title: 'Squat', description: 'Time to do squats!' },
-    // ]);
     const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
@@ -40,39 +28,6 @@ const Header1 = ({ title, navigation, isLogin, username, name }) => {
                         },
                     });
                     const userId = accountResponse.data.id;
-                    // const instanceIdsListResponse = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${userId}`, {
-                    //     headers: {
-                    //         Authorization: `Bearer ${token}`,
-                    //     },
-                    // });
-                    // const inProgressInstances = instanceIdsListResponse.data.filter(instance => instance.status === 'IN_PROGRESS');
-                    // if (inProgressInstances.length === 0) {
-                    //     console.log('No plan instances in progress.');
-                    //     return;
-                    // }
-                    // const inProgressId = inProgressInstances[0].id; 
-                    // const response = await axios.get(`${BASE_URL}/api/date-plan-instances/next?planInstanceId=${inProgressId}`, {
-                    //     headers: {
-                    //         Authorization: `Bearer ${token}`,
-                    //     },
-                    // });
-                
-                    // const data = response.data;
-                
-                    // // Cập nhật state
-                    // setNamePlan(data.planInstance.name);
-                    // setPlanInstanceID(data.planInstance.id);
-                
-                    // const newNotifications = [
-                    //     {
-                    //         id: data.id.toString(),
-                    //         iconName: 'bullseye-arrow',
-                    //         description: 'You have a date plan today',
-                    //         title: `Plan: ${data.planInstance.name}, day: ${data.datePlan.dateOrder}`,
-                    //     },
-                    // ];
-                    // setNotifications(newNotifications);
-                    // setFirstPress(false);
                     const instanceIdsListResponse = await axios.get(`${BASE_URL}/api/plan-instances/all?userId.equals=${userId}`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -83,7 +38,13 @@ const Header1 = ({ title, navigation, isLogin, username, name }) => {
                     const inProgressInstances = instanceIdsListResponse.data.filter(instance => instance.status === 'IN_PROGRESS');
                     if (inProgressInstances.length === 0) {
                         console.log('No plan instances in progress.');
+                        //setFirstPress(true);
+                        await AsyncStorage.setItem('firstPress', JSON.stringify(true));
                         return;
+                    }
+                    else{
+                        //setFirstPress(false);
+                        await AsyncStorage.setItem('firstPress', JSON.stringify(false));
                     }
                     const responses = await Promise.all(
                         inProgressInstances.map(instance =>
@@ -99,6 +60,9 @@ const Header1 = ({ title, navigation, isLogin, username, name }) => {
                     );
                     const validResponses = responses.filter(response => response && response.data);
                     console.log(`LENGTH: ${validResponses.length}`);
+                    if (validResponses.length > 0){
+                        await AsyncStorage.setItem('firstPress', JSON.stringify(false));
+                    }
                     const notifications = validResponses.map(response => {
                         const data = response.data;
                         return {
@@ -114,17 +78,29 @@ const Header1 = ({ title, navigation, isLogin, username, name }) => {
                         setPlanInstanceID(firstResponse.planInstance.id);
                     }
                     setNotifications(notifications);
-                    setFirstPress(false);
+                    console.log(notifications.length);
+                    
                 } catch (error) {
                     console.error('Error fetching notifications:', error);
                 }
             }
             else{
-                setFirstPress(true);
+                //setFirstPress(true);
+                await AsyncStorage.setItem('firstPress', JSON.stringify(true));
                 setNotifications([]);
             }
         };
-
+        const getFirstPress = async () => {
+            try {
+              const value = await AsyncStorage.getItem('firstPress');
+              if (value !== null) {
+                setFirstPress(JSON.parse(value));
+              }
+            } catch (error) {
+              console.error('Error reading firstPress:', error);
+            }
+          };
+        getFirstPress();
         fetchNotifications();
     }, []);
 
@@ -164,8 +140,9 @@ const Header1 = ({ title, navigation, isLogin, username, name }) => {
         </View>
     );
 
-    const handleBELL = () => {
-        setFirstPress(true); 
+    const handleBELL = async () => {
+        //setFirstPress(true); 
+        await AsyncStorage.setItem('firstPress', JSON.stringify(true));
         setIsVisible(!isVisible);
     };
     
@@ -206,7 +183,7 @@ const Header1 = ({ title, navigation, isLogin, username, name }) => {
                             <MaterialCommunityIcons
                             name={firstPress ? "bell-outline" : "bell-badge-outline"}
                             size={50}
-                            color={firstPress ? "black" : "rgb(241, 181, 15)"}
+                            color={firstPress ? "black" : "rgb(19, 231, 150)"}
                             />
                         </TouchableOpacity>
                     </View>
@@ -302,7 +279,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.25)', 
       },
     modalContent: {
-        backgroundColor: 'white',
+        backgroundColor: '#fff',
         marginTop: 185,
         marginRight:'10%',
         alignSelf: 'flex-end',
@@ -370,9 +347,10 @@ const styles = StyleSheet.create({
         color: '#555',
     },
     title: {
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: 'bold',
         textAlign: 'center',
+        fontStyle: 'italic'
     },
     buttonContainer: {
         flexDirection: 'row',

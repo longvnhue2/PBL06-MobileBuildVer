@@ -146,10 +146,10 @@ const MyPlan = (props) => {
 
 const styles = StyleSheet.create({
     container: {
-        marginBottom: 125,
+        height: '30%',
     },
     noPlanContainer: {
-        height: '65%',
+        height: '30%',
         justifyContent: 'space-around',
         alignItems: 'center',
     },

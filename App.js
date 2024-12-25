@@ -64,6 +64,7 @@ export default function App() {
             try {
                 await AsyncStorage.clear();  
                 await AsyncStorage.setItem('state', 'false'); 
+                await AsyncStorage.setItem('firstPress', JSON.stringify(true));
                 console.log('AsyncStorage cleared on app exit');
             } catch (error) {
                 console.error('Error clearing AsyncStorage:', error);
@@ -141,7 +142,7 @@ export default function App() {
   return (
     <ColorProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
+        <Stack.Navigator initialRouteName="HomieScr">
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="testingNavi" component={testingNavi} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />

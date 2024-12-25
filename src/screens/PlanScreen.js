@@ -1202,7 +1202,7 @@ const styles = StyleSheet.create({
         zIndex: 10,
         overflow: 'hidden',
         backgroundColor: 'rgb(34,50,52)',
-        marginBottom: 70
+        marginBottom: 95
     },
     feedbackHeader: {
         flexDirection: 'row',
