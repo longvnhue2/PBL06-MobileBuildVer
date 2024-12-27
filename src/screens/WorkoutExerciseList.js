@@ -141,7 +141,9 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                     },
                 });
                 const Attribute_response = await axios.get(`${BASE_URL}/public/api/attributes/all`);
+                //console.log(Attribute_response.data);
                 const fixPublicResponse = await axios.get(`${BASE_URL}/public/api/exercises/all`);
+                //console.log(fixPublicResponse.data);
                 const exerciseAttributesMap = response.data.reduce((map, data) => {
                     if (!map[data.exercise.id]) {
                         map[data.exercise.id] = [];
@@ -199,6 +201,7 @@ const WorkoutExerciseList = ({ navigation, route }) => {
                             : item
                     )
                 );
+                
                 setExerciseData(DataGET);
 
                 const attributeType = route.params?.attribute || 'ALL';

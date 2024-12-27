@@ -8,7 +8,6 @@ import { useColor } from '../context/ColorContext'
 import PlanContent from '../components/PlanContent'
 import axios from 'axios'
 import BASE_URL from '../../IPHelper'
-import SearchBar from '../components/SearchBar'
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { useFocusEffect } from '@react-navigation/native'
@@ -17,14 +16,11 @@ import { useFocusEffect } from '@react-navigation/native'
 const InsightScreen = (props) => {
     const { navigation } = props
     const {selectedColor} = useColor()
-    const username = AsyncStorage.getItem('username')
-    const [inputText, setInputText] = useState('');
-
     const [planData, setPlanData] = useState([]);
-    const [filterPlan, setFilterPlan] = useState([]);
     const [isRefresh, setIsRefresh] = useState(false);
     const [devicePushToken, setDevicePushToken] = useState("");
     const [expoPushToken, setExpoPushToken] = useState("");
+    const [username, setUsername] = useState("");
 
 
     useEffect(() => {
@@ -45,6 +41,7 @@ const InsightScreen = (props) => {
     
     useEffect(() => {
         const registerForPushNotifications = async () => {
+                setUsername(await AsyncStorage.getItem('username') || '');
                 const { status: existingStatus } = await Notifications.getPermissionsAsync();
                 let finalStatus = existingStatus;
                 if (existingStatus !== "granted") {
@@ -52,8 +49,8 @@ const InsightScreen = (props) => {
                 finalStatus = status;
                 }
                 if (finalStatus !== "granted") {
-                alert("Failed to get push token!");
-                return;
+                    alert("Failed to get push token!");
+                    return;
                 }
                 const projectId = Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId;
                 const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
@@ -108,6 +105,11 @@ const InsightScreen = (props) => {
     
                         return acc;
                     }, {});
+
+                    if (!getPlanData || !Array.isArray(getPlanData)) {
+                        console.error("Invalid getPlanData format");
+                        return;
+                    }
     
                     const PlanData = getPlanData.map(data => ({
                         id: data.id,
@@ -121,7 +123,7 @@ const InsightScreen = (props) => {
                     }));
     
                     setPlanData(PlanData);
-                    setFilterPlan(PlanData);
+                    // setFilterPlan(PlanData);
                 } catch (error) {
                     console.error("Error getting plan:", error);
                 }
@@ -129,79 +131,9 @@ const InsightScreen = (props) => {
             fetchData();
             return () => {
                 setPlanData([]);
-                setFilterPlan([]);
             };
         }, [isRefresh]) 
     );
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         const accessToken = await AsyncStorage.getItem('accessToken')
-
-    //         try {
-    //             const { data: getAccount } = await axios.get(`${BASE_URL}/api/account`, {
-    //                 headers: {
-    //                     Authorization: `Bearer ${accessToken}`
-    //                 }
-    //             })
-
-    //             const { data: getPlanData } = await axios.get(`${BASE_URL}/api/plans/all?userId.equals=${getAccount.id}`, {
-    //                 headers: {
-    //                     Authorization: `Bearer ${accessToken}`
-    //                 }
-    //             });
-                
-
-    //             const responseDate_Plan = await axios.get(`${BASE_URL}/api/date-plans/all`, {
-    //                 headers: {
-    //                     Authorization: `Bearer ${accessToken}`,
-    //                 },
-    //             });
-
-    //             const responseExercise_Plans = await axios.get(`${BASE_URL}/api/exercise-plans/all`, {
-    //             headers: {
-    //               Authorization: `Bearer ${accessToken}`,
-    //             },
-    //           });
-
-    //             const plansWithExerciseCount = responseDate_Plan.data.reduce((acc, datePlan) => {
-    //                 const matchingExercises = responseExercise_Plans.data.filter(exercisePlan => exercisePlan.datePlanId === datePlan.id);
-
-    //                 if (!acc[datePlan.planId]) {
-    //                 acc[datePlan.planId] = 0;
-    //                 }
-
-    //                 acc[datePlan.planId] += matchingExercises.length;
-
-    //                 return acc;
-    //             }, {});
-
-    //             const PlanData = getPlanData.map(data => ({
-    //                 id: data.id,
-    //                 title: data.name,
-    //                 subtitle1: data.status,
-    //                 subtitle2: `${plansWithExerciseCount[data.id] || 0} exercises`,
-    //                 iconName: 'linux',
-    //                 totalDays: data.totalDays || 0,
-    //                 description: data.description,
-    //                 status: data.status
-    //             }));
-
-    //             setPlanData(PlanData);
-    //             setFilterPlan(PlanData);
-    //         }
-    //         catch (error){
-    //             console.error("Error getting plan:", error)
-    //         }
-    //     }
-    //     fetchData();
-    // }, [navigation, isRefresh])
-
-    const handleChangeInputSearch = (text) => {
-      setPlanData(filterPlan)
-      setPlanData(filterPlan.filter((plan) => plan.title.toLowerCase().includes(text.toLowerCase())))
-    };
-
     return (
         <View style={[styles.container, {backgroundColor: selectedColor}]}>
             <Header1 
@@ -222,14 +154,7 @@ const InsightScreen = (props) => {
                     </TouchableOpacity>
                 </View>
 
-                <View style={styles.searchContainer}>
-                    {/* <SearchBar
-                        placeholder="Name ..."
-                        onChange={handleChangeInputSearch}
-                    /> */}
-                </View>
-
-                <View style={{marginBottom: 20}}>
+                <View style={{marginBottom: 100}}>
                     {planData.map((plan, index) => (
                         <PlanContent
                             key={index}
@@ -308,6 +233,6 @@ const styles = StyleSheet.create({
         bottom: 0,
         width: "100%",
     },
-})
+});
 
-export default InsightScreen
+export default InsightScreen;

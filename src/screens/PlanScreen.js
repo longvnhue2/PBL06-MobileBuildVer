@@ -504,6 +504,7 @@ const PlanScreen = ({ navigation, route }) => {
                             setAndRep: exercisePlanMap[data.exercise.id] || {setCount: 0, repCount: 0}, 
                             imgsrc: exerciseFallback.imgsrc,
                             text: data.exercise.name,
+                            met:data.exercise.met,
                             videopath: exerciseFallback.videopath,
                             description: data.exercise.description,
                             time: datePlan.time || '00:00',     
@@ -732,6 +733,7 @@ const PlanScreen = ({ navigation, route }) => {
                                     dateOrder={exercise.dateOrder}
                                     restTime={exercise.restTime}
                                     setAndRep={exercise.setAndRep}
+                                    met={exercise.met}
                                     back='Plan'
                                 />
                             ))}

@@ -8,14 +8,13 @@ import TopPlan from '../components/TopPlan'
 import axios from 'axios'
 import BASE_URL from '../../IPHelper'
 import MyPlan from '../components/MyPlan'
-import { Image } from 'react-native-svg'
 import Icon from 'react-native-vector-icons/FontAwesome';
 import FontAwesome5Icon from 'react-native-vector-icons/FontAwesome5'
 
 const PlanPortal = (props) => {
     const { navigation } = props
     const {selectedColor} = useColor()
-    const username = AsyncStorage.getItem('username')
+    const [username, setUsername] = useState("");
 
     const [planData, setPlanData] = useState([]);
     const [randomPlans, setRandomPlans] = useState([]);
@@ -58,6 +57,7 @@ const PlanPortal = (props) => {
 
     const getAllPlan = async () => {
         try {
+            setUsername(await AsyncStorage.getItem('username') || '');
             const accessToken = await AsyncStorage.getItem('accessToken');
             const { data: getAllPlan } = await axios.get(`${BASE_URL}/public/api/plans/all`);
             const publicPlan = getAllPlan.filter((plan) => plan.status === 'PUBLIC');
@@ -373,6 +373,6 @@ const styles = StyleSheet.create({
         fontSize: 25,
         color: '#fff'
     }
-})
+});
 
-export default PlanPortal
+export default PlanPortal;

@@ -21,7 +21,7 @@ const ExerciseDetails = ({navigation, route}) => {
     const isFavorited = route.params?.isFavorited;
     const description = route.params?.description;
     const onFavoriteChange = route.params?.onFavoriteChange;
-    const ID = route.params?.exerciseId;
+    const ID = route.params?.exerciseID;
     // console.log(videopath);
     const [isLogin, setIsLogin] = useState(false);
     const [username, setUsername] = useState('');
@@ -64,6 +64,7 @@ const ExerciseDetails = ({navigation, route}) => {
             
             const userId = accountResponse.data.id;
             const exerciseId = ID;
+            console.log(`FAVORITE ${ID}`)
             
             if (!isStarFilled) {
                 try {

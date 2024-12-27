@@ -311,6 +311,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#fff', 
         marginTop: 10,
+        alignSelf: 'center',
         borderRadius:5,
         backgroundColor: '#003b3b',
     },

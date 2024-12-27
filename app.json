@@ -16,6 +16,8 @@
       "bundleIdentifier": "com.longvnhue.gymex"
     },
     "android": {
+      "useNextNotificationsApi": true,
+      "permissions": ["NOTIFICATIONS"],
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
