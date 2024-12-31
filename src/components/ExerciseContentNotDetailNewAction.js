@@ -63,7 +63,7 @@ const ExerciseContentNotDetailNewAction = (props) => {
             <View style={styles.textContainer}>
                 <Text style={styles.TextDesc}>{props.text}</Text>
                 <Text style={styles.TextDesc}>{props.propertyDetail}</Text>
-                <Text style={styles.TextDesc}>Calorine Consume: {props.caloConsume}</Text>
+                <Text style={styles.TextDesc}>Met index: {props.met}</Text>
             </View>
 
             <View style={{flexDirection:'column'}}>

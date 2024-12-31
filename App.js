@@ -142,7 +142,7 @@ export default function App() {
   return (
     <ColorProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="HomieScr">
+        <Stack.Navigator initialRouteName="Home">
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="testingNavi" component={testingNavi} />
           <Stack.Screen name="LoginScreen" component={LoginScreen} />

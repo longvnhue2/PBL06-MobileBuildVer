@@ -213,6 +213,6 @@ const styles = StyleSheet.create({
     activeDot: {
         color: '#6200EE',
     },
-})
+});
 
-export default MyPlan
+export default MyPlan;

@@ -344,7 +344,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
             const publicResponse = await axios.get(`${BASE_URL}/public/api/exercises/all`);
             const dataGET = publicResponse.data
                 .filter((exercise) => newExerciseIds.includes(exercise.id))
-                .map(({ publicImageUrl, id, caloConsume, name }) => {
+                .map(({ publicImageUrl, id, caloConsume, name, met }) => {
                     const existingExercise = exerciseData.find((item) => item.id === id);
                     return {
                         id: id,
@@ -354,6 +354,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
                         reps: existingExercise ? existingExercise.reps : 5,
                         rest: existingExercise ? existingExercise.rest : 20,
                         caloConsume,
+                        met,
                         text: name,
                         day: dateOrder,
                     };
@@ -455,6 +456,7 @@ const CustomPlanScreen = ({ navigation, route }, props) => {
                             imgsrc={exercise.imgsrc}
                             text={exercise.text}
                             caloConsume={exercise.caloConsume}
+                            met={exercise.met}
                             propertyDetail={exercise.propertyDetail}
                             QuicklyRefresh={QuicklyRefresh}
                             exerciseIds={exerciseIds}

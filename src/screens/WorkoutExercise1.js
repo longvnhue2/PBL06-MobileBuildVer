@@ -7,7 +7,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useColor } from "../context/ColorContext";
-import { LinearTextGradient } from "react-native-text-gradient";
 import GradientText from "../components/GradientText";
 import LottieView from "lottie-react-native";
 import BASE_URL from "../../IPHelper";

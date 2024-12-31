@@ -45,7 +45,7 @@ const ExerciseContent = (props) => {
             // const text = props.text;
             // const description = props.description;
             // const videopath = props.videopath;
-
+            console.log(`NAVIGATE TO: ${exerciseID}`);
             props.navigation?.navigate('ExerciseDetails', {
                 exerciseID,
                 text,
